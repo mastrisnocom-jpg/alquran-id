@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Qur'anul Karim — Supabase Auth Edition</title>
+    <title>Al-Qur'anul Karim — Supabase Edition</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,29 +39,26 @@
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             
-            <!-- Logo Brand -->
+            <!-- Logo -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
                 <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 font-bold text-xl">📖</div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight text-emerald-700 dark:text-emerald-400">Al-Qur'anul Karim</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Modern Digital Quran</p>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Digital Quran App</p>
                 </div>
             </div>
 
             <!-- Header Controls -->
             <div class="flex items-center gap-2">
-                <!-- Tombol Cari -->
-                <button id="btnOpenSearch" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition" title="Cari Surah">🔍</button>
+                <button id="btnOpenSearch" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
-                <!-- Tombol Auth Login / Logout -->
                 <div id="authButtonContainer">
-                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button id="btnNavAuth" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
 
-                <!-- Tombol Dark Mode -->
-                <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition" title="Ganti Mode Mode">
+                <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">
                     <span id="themeIcon">☀️</span>
                 </button>
             </div>
@@ -69,7 +66,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Area -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-6">
 
         <!-- Widget Last Read -->
@@ -97,7 +94,6 @@
                     <option value="en.sahih" class="dark:bg-darkCard">🇬🇧 English</option>
                     <option value="fr.hamidullah" class="dark:bg-darkCard">🇫🇷 Français</option>
                     <option value="es.cortes" class="dark:bg-darkCard">🇪🇸 Español</option>
-                    <option value="tr.yazir" class="dark:bg-darkCard">🇹🇷 Türkçe</option>
                 </select>
             </div>
 
@@ -107,17 +103,16 @@
                     <option value="ar.alafasy" class="dark:bg-darkCard">Mishary Rashid Alafasy</option>
                     <option value="ar.abdurrahmaanasassudais" class="dark:bg-darkCard">Abdurrahman As-Sudais</option>
                     <option value="ar.hudhaify" class="dark:bg-darkCard">Ali Al-Hudhaify</option>
-                    <option value="ar.husary" class="dark:bg-darkCard">Mahmoud Al-Hussary</option>
                 </select>
             </div>
         </div>
 
-        <!-- Area Detail Ayat Surah -->
+        <!-- Area Baca Surah -->
         <section id="mainReadArea">
             <div id="surahDetail" class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 min-h-[400px]">
                 <div id="placeholderView" class="text-center py-16 text-slate-400">
                     <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-emerald-500/10 flex items-center justify-center text-3xl">🔍</div>
-                    <p class="text-xs font-medium">Klik tombol <span class="text-emerald-600 font-bold">Cari 🔍</span> di atas untuk memilih dan membaca Surah.</p>
+                    <p class="text-xs font-medium">Klik tombol <span class="text-emerald-600 font-bold">Cari 🔍</span> di atas untuk memilih Surah.</p>
                 </div>
 
                 <div id="surahHeader" class="hidden mb-6 text-center pb-6 border-b border-slate-200 dark:border-slate-800">
@@ -138,12 +133,10 @@
     <div id="searchModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-16 px-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-                <input type="text" id="searchInput" placeholder="Ketik nama atau nomor surah (misal: Yasin, 36)..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:outline-none text-xs dark:text-white">
-                <button onclick="closeSearchModal()" class="text-xs font-semibold px-3 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Batal</button>
+                <input type="text" id="searchInput" placeholder="Ketik nama/nomor surah (misal: Yasin, 36)..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:outline-none text-xs dark:text-white">
+                <button id="btnCloseSearch" class="text-xs font-semibold px-3 py-2 text-slate-500">Batal</button>
             </div>
-            <div id="surahList" class="p-2 max-h-[60vh] overflow-y-auto space-y-1">
-                <div class="text-center py-8 text-xs text-slate-400">Memuat data surah...</div>
-            </div>
+            <div id="surahList" class="p-2 max-h-[60vh] overflow-y-auto space-y-1"></div>
         </div>
     </div>
 
@@ -152,7 +145,7 @@
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="authModalTitle" class="text-base font-bold text-emerald-600 dark:text-emerald-400">Masuk ke Akun</h3>
-                <button onclick="closeAuthModal()" class="text-slate-400 text-lg hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+                <button id="btnCloseAuth" class="text-slate-400 text-lg">✕</button>
             </div>
 
             <form id="authForm" class="space-y-3">
@@ -172,19 +165,21 @@
 
             <div class="mt-4 text-center text-xs text-slate-400">
                 <span id="authToggleText">Belum punya akun?</span>
-                <button type="button" onclick="toggleAuthMode()" id="btnToggleAuth" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
+                <button type="button" id="btnToggleAuth" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
                     Daftar Akun Baru
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- JavaScript Master Script -->
     <script>
-        // 1. SUPABASE CLIENT
+        // Kredensial Supabase
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Inisialisasi Supabase
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         // State Global
         let currentUser = null;
@@ -194,12 +189,15 @@
         let selectedLang = 'id.indonesian';
         let selectedQori = 'ar.alafasy';
 
-        // Elements
+        // DOM Elements
         const authModal = document.getElementById('authModal');
         const authForm = document.getElementById('authForm');
-        const authButtonContainer = document.getElementById('authButtonContainer');
+        const btnNavAuth = document.getElementById('btnNavAuth');
+        const btnCloseAuth = document.getElementById('btnCloseAuth');
+        const btnToggleAuth = document.getElementById('btnToggleAuth');
         const searchModal = document.getElementById('searchModal');
         const btnOpenSearch = document.getElementById('btnOpenSearch');
+        const btnCloseSearch = document.getElementById('btnCloseSearch');
         const searchInput = document.getElementById('searchInput');
         const surahListEl = document.getElementById('surahList');
         const placeholderView = document.getElementById('placeholderView');
@@ -215,49 +213,38 @@
         const themeToggle = document.getElementById('themeToggle');
 
         // Init App
-        document.addEventListener('DOMContentLoaded', async () => {
-            initTheme();
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTheme();
             fetchSurahList();
-            checkUserSession();
+            setupAuthAndSession();
+            setupEventListeners();
         });
 
-        // 2. PERBAIKAN DARK MODE (AKTIF 100%)
-        function initTheme() {
-            if (localStorage.theme === 'light') {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('themeIcon').textContent = '🌙';
-            } else {
+        // 1. TEKNIS DARK MODE
+        function setupTheme() {
+            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
                 document.documentElement.classList.add('dark');
                 document.getElementById('themeIcon').textContent = '☀️';
-            }
-        }
-
-        themeToggle.addEventListener('click', () => {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-                document.getElementById('themeIcon').textContent = '🌙';
             } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-                document.getElementById('themeIcon').textContent = '☀️';
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').textContent = '🌙';
             }
-        });
 
-        // 3. PERBAIKAN PENCARIAN (AKTIF 100%)
-        btnOpenSearch.addEventListener('click', () => {
-            searchModal.classList.remove('hidden');
-            if (allSurahs.length > 0) {
-                renderSurahSearchList(allSurahs);
-            }
-            setTimeout(() => searchInput.focus(), 150);
-        });
-
-        function closeSearchModal() {
-            searchModal.classList.add('hidden');
-            searchInput.value = '';
+            themeToggle.onclick = () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    document.getElementById('themeIcon').textContent = '🌙';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    document.getElementById('themeIcon').textContent = '☀️';
+                }
+            };
         }
 
+        // 2. TEKNIS PENCARIAN SURAH
         async function fetchSurahList() {
             try {
                 const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -268,25 +255,9 @@
             }
         }
 
-        searchInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase().trim();
-            if (val === '') {
-                renderSurahSearchList(allSurahs);
-                return;
-            }
-
-            const filtered = allSurahs.filter(s => 
-                s.englishName.toLowerCase().includes(val) || 
-                s.englishNameTranslation.toLowerCase().includes(val) ||
-                s.number.toString() === val
-            );
-
-            renderSurahSearchList(filtered);
-        });
-
         function renderSurahSearchList(list) {
-            if (list.length === 0) {
-                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Tidak ada surah yang cocok.</div>`;
+            if (!list || list.length === 0) {
+                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Surah tidak ditemukan.</div>`;
                 return;
             }
 
@@ -306,14 +277,17 @@
             `).join('');
         }
 
-        function selectSurah(surahNo) {
-            closeSearchModal();
+        window.selectSurah = function(surahNo) {
+            searchModal.classList.add('hidden');
+            searchInput.value = '';
             loadSurah(surahNo);
             document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
-        }
+        };
 
-        // 4. PERBAIKAN LOGIN / AUTH SUPABASE (AKTIF 100%)
-        async function checkUserSession() {
+        // 3. TEKNIS AUTHENTICATION (LOGIN/REGISTER)
+        async function setupAuthAndSession() {
+            if (!supabase) return;
+
             const { data: { session } } = await supabase.auth.getSession();
             updateUserUI(session ? session.user : null);
 
@@ -324,8 +298,10 @@
 
         function updateUserUI(user) {
             currentUser = user;
+            const container = document.getElementById('authButtonContainer');
+            
             if (user) {
-                authButtonContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="text-[11px] text-slate-500 dark:text-slate-400 max-w-[90px] truncate">${user.email}</span>
                         <button onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition">
@@ -335,34 +311,30 @@
                 userEmailTag.textContent = user.email.split('@')[0];
                 loadBookmarkFromSupabase();
             } else {
-                authButtonContainer.innerHTML = `
-                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                container.innerHTML = `
+                    <button id="btnNavAuth" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>`;
                 lastReadWidget.classList.add('hidden');
             }
         }
 
-        function openAuthModal() {
-            authModal.classList.remove('hidden');
-        }
+        window.openAuthModal = function() { authModal.classList.remove('hidden'); };
+        window.closeAuthModal = function() { authModal.classList.add('hidden'); };
 
-        function closeAuthModal() {
-            authModal.classList.add('hidden');
-        }
+        window.handleLogout = async function() {
+            if (supabase) {
+                await supabase.auth.signOut();
+                alert('Berhasil keluar akun.');
+            }
+        };
 
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
-            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
-            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
-            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
-        }
-
-        authForm.addEventListener('submit', async (e) => {
+        authForm.onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
+
+            if (!supabase) return alert("Koneksi Supabase belum siap.");
 
             try {
                 if (isRegisterMode) {
@@ -372,49 +344,38 @@
                 } else {
                     const { error } = await supabase.auth.signInWithPassword({ email, password });
                     if (error) throw error;
+                    alert('Berhasil masuk!');
                 }
                 closeAuthModal();
             } catch (err) {
-                alert('Gagal Login/Daftar: ' + err.message);
+                alert('Gagal: ' + err.message);
             }
-        });
+        };
 
-        async function handleLogout() {
-            await supabase.auth.signOut();
-            alert('Anda telah keluar.');
-        }
-
-        // 5. SUPABASE BOOKMARK
-        async function saveBookmarkToSupabase(surahNo, surahName, ayatNo) {
+        // 4. TEKNIS BOOKMARK CLOUD
+        window.saveBookmarkToSupabase = async function(surahNo, surahName, ayatNo) {
             if (!currentUser) {
-                alert('Silakan MASUK / LOGIN terlebih dahulu untuk menyimpan bookmark.');
+                alert('Silakan MASUK/LOGIN terlebih dahulu untuk menyimpan bookmark.');
                 openAuthModal();
                 return;
             }
 
             try {
                 await supabase.from('bookmarks').delete().eq('user_id', currentUser.id);
-
                 const { error } = await supabase.from('bookmarks').insert([
-                    {
-                        user_id: currentUser.id,
-                        surah_no: surahNo,
-                        surah_name: surahName,
-                        ayat_no: ayatNo
-                    }
+                    { user_id: currentUser.id, surah_no: surahNo, surah_name: surahName, ayat_no: ayatNo }
                 ]);
 
                 if (error) throw error;
-
-                alert(`Bookmark tersimpan: ${surahName} ayat ${ayatNo}`);
+                alert(`Tersimpan di Cloud: ${surahName} ayat ${ayatNo}`);
                 loadBookmarkFromSupabase();
             } catch (err) {
                 alert('Gagal menyimpan bookmark: ' + err.message);
             }
-        }
+        };
 
         async function loadBookmarkFromSupabase() {
-            if (!currentUser) return;
+            if (!currentUser || !supabase) return;
 
             try {
                 const { data, error } = await supabase
@@ -441,26 +402,16 @@
                     };
                 }
             } catch (err) {
-                console.error('Gagal memuat bookmark:', err.message);
+                console.error('Gagal membaca bookmark:', err.message);
             }
         }
 
-        // 6. LOAD DETAIL AYAT & CONTROL LISTENERS
-        langSelect.addEventListener('change', (e) => {
-            selectedLang = e.target.value;
-            if (currentSurahNo) loadSurah(currentSurahNo);
-        });
-
-        qoriSelect.addEventListener('change', (e) => {
-            selectedQori = e.target.value;
-            if (currentSurahNo) loadSurah(currentSurahNo);
-        });
-
+        // 5. TEKNIS MEMUAT SURAH & AYAT
         async function loadSurah(surahNo) {
             currentSurahNo = surahNo;
             placeholderView.classList.add('hidden');
             surahHeader.classList.remove('hidden');
-            ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat teks ayat, audio, dan terjemahan...</div>`;
+            ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat data ayat...</div>`;
 
             try {
                 const [arabicRes, transRes, audioRes] = await Promise.all([
@@ -476,7 +427,7 @@
 
                 document.getElementById('activeSurahNumber').textContent = `SURAH NO. ${surahInfo.number}`;
                 document.getElementById('activeSurahName').textContent = `${surahInfo.englishName} (${surahInfo.name})`;
-                document.getElementById('activeSurahTranslation').textContent = `${surahInfo.revelationType} • ${surahInfo.numberOfAyahs} AYAT — ${surahInfo.englishNameTranslation}`;
+                document.getElementById('activeSurahTranslation').textContent = `${surahInfo.revelationType} • ${surahInfo.numberOfAyahs} AYAT`;
 
                 if (audioData.data.ayahs.length > 0) {
                     document.getElementById('globalAudioPlayer').src = audioData.data.ayahs[0].audio;
@@ -491,7 +442,7 @@
 
                 renderAyat(combinedAyahs, surahInfo.englishName);
             } catch (err) {
-                ayatContainer.innerHTML = `<p class="text-red-400 text-center text-xs">Gagal memuat data ayat.</p>`;
+                ayatContainer.innerHTML = `<p class="text-red-400 text-center text-xs">Gagal memuat ayat.</p>`;
             }
         }
 
@@ -500,7 +451,6 @@
                 <div id="ayat-${a.numberInSurah}" class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                     <div class="flex justify-between items-center mb-4">
                         <span class="w-7 h-7 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center">${a.numberInSurah}</span>
-                        
                         <div class="flex items-center gap-1">
                             <button onclick="saveBookmarkToSupabase(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" 
                                 class="px-2.5 py-1 text-slate-400 hover:text-emerald-500 text-xs transition flex items-center gap-1">
@@ -526,22 +476,67 @@
             `).join('');
         }
 
-        function shareAyat(surahName, ayatNo, textArab) {
+        window.shareAyat = function(surahName, ayatNo, textArab) {
             const shareText = `Al-Qur'an - ${surahName} Ayat ${ayatNo}:\n\n"${textArab}"`;
             if (navigator.share) {
                 navigator.share({ title: `${surahName}:${ayatNo}`, text: shareText, url: window.location.href }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(shareText);
-                alert('Teks ayat berhasil disalin!');
+                alert('Teks disalin!');
             }
-        }
+        };
 
         let activeAudio = null;
-        function playAudioAyat(url) {
+        window.playAudioAyat = function(url) {
             if (activeAudio) activeAudio.pause();
             if (!url) return alert('Audio tidak tersedia.');
             activeAudio = new Audio(url);
             activeAudio.play();
+        };
+
+        function setupEventListeners() {
+            btnOpenSearch.onclick = () => {
+                searchModal.classList.remove('hidden');
+                if (allSurahs.length > 0) renderSurahSearchList(allSurahs);
+                setTimeout(() => searchInput.focus(), 150);
+            };
+
+            btnCloseSearch.onclick = () => {
+                searchModal.classList.add('hidden');
+                searchInput.value = '';
+            };
+
+            btnCloseAuth.onclick = () => authModal.classList.add('hidden');
+
+            btnToggleAuth.onclick = () => {
+                isRegisterMode = !isRegisterMode;
+                document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
+                document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+                document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
+                btnToggleAuth.textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
+            };
+
+            searchInput.oninput = (e) => {
+                const val = e.target.value.toLowerCase().trim();
+                if (val === '') return renderSurahSearchList(allSurahs);
+
+                const filtered = allSurahs.filter(s => 
+                    s.englishName.toLowerCase().includes(val) || 
+                    s.englishNameTranslation.toLowerCase().includes(val) ||
+                    s.number.toString() === val
+                );
+                renderSurahSearchList(filtered);
+            };
+
+            langSelect.onchange = (e) => {
+                selectedLang = e.target.value;
+                if (currentSurahNo) loadSurah(currentSurahNo);
+            };
+
+            qoriSelect.onchange = (e) => {
+                selectedQori = e.target.value;
+                if (currentSurahNo) loadSurah(currentSurahNo);
+            };
         }
     </script>
 </body>
