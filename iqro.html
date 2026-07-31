@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buku Iqro Digital 1–6 — Al-Qur'an App</title>
+    <title>Buku Iqro 1-6 Asli PDF — Al-Qur'an Digital</title>
     
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,150 +13,124 @@
             theme: {
                 extend: {
                     colors: {
-                        emerald: { 950: '#022c22', 900: '#064e3b', 800: '#065f46', 600: '#059669', 500: '#10b981', 100: '#d1fae5', 50: '#f0fdf4' },
-                        darkBg: '#0b1120', darkCard: '#151e32'
+                        emerald: {
+                            950: '#022c22',
+                            900: '#064e3b',
+                            800: '#065f46',
+                            600: '#059669',
+                            500: '#10b981',
+                            100: '#d1fae5',
+                            50: '#f0fdf4',
+                        },
+                        darkBg: '#0b1120',
+                        darkCard: '#151e32',
                     }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Scheherazade+New:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-arabic { font-family: 'Scheherazade New', serif; direction: rtl; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-12">
+<body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
 
-    <!-- NAVBAR HEADER -->
+    <!-- HEADER NAVBAR -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/index.html" class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xl flex items-center justify-center">📚</div>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-xl flex items-center justify-center">
+                    📚
+                </div>
                 <div>
-                    <h1 class="text-lg font-bold text-emerald-700 dark:text-emerald-400">Buku Iqro Digital</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Lengkap Jilid 1 sampai 6</p>
+                    <h1 class="text-lg font-bold leading-tight tracking-tight text-emerald-700 dark:text-emerald-400">
+                        Buku Iqro 1–6 (PDF)
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Cara Cepat Belajar Membaca Al-Qur'an</p>
                 </div>
             </a>
-            <a href="/index.html" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow hover:bg-emerald-700 transition">📗 Baca Al-Qur'an</a>
+
+            <div class="flex items-center gap-2">
+                <a href="/index.html" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow hover:bg-emerald-700 transition">
+                    📗 Baca Al-Qur'an
+                </a>
+                <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
+                    <span id="themeIcon">☀️</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-6">
-
-        <!-- NAVIGASI PILIH JILID IQRO (1 - 6) -->
-        <div class="bg-white dark:bg-darkCard p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">Pilih Jilid Iqro</h3>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                <button onclick="selectJilid(1)" id="btnJ1" class="jilid-btn p-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow">Iqro 1</button>
-                <button onclick="selectJilid(2)" id="btnJ2" class="jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition">Iqro 2</button>
-                <button onclick="selectJilid(3)" id="btnJ3" class="jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition">Iqro 3</button>
-                <button onclick="selectJilid(4)" id="btnJ4" class="jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition">Iqro 4</button>
-                <button onclick="selectJilid(5)" id="btnJ5" class="jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition">Iqro 5</button>
-                <button onclick="selectJilid(6)" id="btnJ6" class="jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition">Iqro 6</button>
+    <!-- MAIN VIEWER PDF -->
+    <main class="max-w-5xl mx-auto px-2 sm:px-4 py-4 flex-1 w-full flex flex-col space-y-3">
+        
+        <!-- CONTROL BAR & LINK DOWNLOAD -->
+        <div class="bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-medium">
+                <span>📖 Tampilan PDF Buku Cetak Asli (K.H. As'ad Humam)</span>
             </div>
+
+            <a href="https://dn760008.eu.archive.org/0/items/humam-2000-buku-iqro-cara-cepat-belajar-membaca-al-quran-1-6/Humam%20-%202000%20-%20Buku%20Iqro%27%20Cara%20Cepat%20Belajar%20Membaca%20Al-Qur%27an_1-6.pdf" 
+               target="_blank" 
+               download 
+               class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold transition flex items-center gap-1.5">
+                <span>📥</span> Download PDF
+            </a>
         </div>
 
-        <!-- IQRO BOARD VIEWER -->
-        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-5 space-y-5 shadow-sm">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div>
-                    <h2 id="iqroHeaderTitle" class="font-bold text-base text-emerald-600 dark:text-emerald-400">Iqro 1 — Halaman 1</h2>
-                    <p id="iqroHeaderDesc" class="text-xs text-slate-400">Pengenalan Huruf Hijaiyah Berharakat Fathah (A - Ba)</p>
-                </div>
-                <div class="flex gap-2 self-end sm:self-auto">
-                    <button onclick="changePage(-1)" class="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-xs hover:bg-emerald-500 hover:text-white transition">← Prev</button>
-                    <button onclick="changePage(1)" class="px-3.5 py-1.5 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition shadow">Next →</button>
-                </div>
-            </div>
-
-            <!-- GRID MATERI ARAB DINAMIS -->
-            <div id="iqroContentGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 min-h-[300px] p-2">
-                <!-- Dirender dari JavaScript Database -->
-            </div>
+        <!-- CONTAINER IFRAME PDF VIEWER -->
+        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-lg flex-1 min-h-[75vh]">
+            <iframe 
+                src="https://dn760008.eu.archive.org/0/items/humam-2000-buku-iqro-cara-cepat-belajar-membaca-al-quran-1-6/Humam%20-%202000%20-%20Buku%20Iqro%27%20Cara%20Cepat%20Belajar%20Membaca%20Al-Qur%27an_1-6.pdf#toolbar=1&navpanes=0&scrollbar=1" 
+                class="w-full h-full min-h-[75vh] border-none"
+                title="Buku Iqro 1-6 PDF">
+                <p class="p-6 text-center text-xs text-slate-400">
+                    Browser Anda tidak mendukung pratinjau PDF langsung. 
+                    <a href="https://dn760008.eu.archive.org/0/items/humam-2000-buku-iqro-cara-cepat-belajar-membaca-al-quran-1-6/Humam%20-%202000%20-%20Buku%20Iqro%27%20Cara%20Cepat%20Belajar%20Membaca%20Al-Qur%27an_1-6.pdf" class="text-emerald-500 underline font-bold">Klik di sini untuk mengunduh PDF Iqro</a>.
+                </p>
+            </iframe>
         </div>
 
     </main>
 
+    <!-- JAVASCRIPT LOGIC THEME -->
     <script>
-        // DATABASE LENGKAP MATERI IQRO JILID 1 SAMPAI 6 (BERBEDA-BEDA)
-        const iqroDatabase = {
-            1: [
-                { page: 1, title: "Iqro 1: Huruf أ (A) dan ب (BA)", items: ["أَ", "بَ", "أَ بَ", "بَ أَ", "أَ أَ", "بَ بَ", "أَ بَ أَ", "بَ أَ بَ", "أَ أَ بَ", "بَ بَ أَ"] },
-                { page: 2, title: "Iqro 1: Pengenalan Huruf ت (TA)", items: ["تَ", "أَ تَ", "بَ تَ", "تَ أَ بَ", "أَ بَ تَ", "بَ تَ أَ", "تَ بَ أَ", "أَ تَ بَ", "تَ تَ أَ", "بَ تَ تَ"] },
-                { page: 3, title: "Iqro 1: Pengenalan Huruf ث (TSA)", items: ["ثَ", "تَ ثَ", "أَ ثَ", "ثَ بَ تَ", "أَ بَ تَ ثَ", "ثَ أَ بَ", "تَ ثَ بَ", "بَ ثَ تَ", "ثَ ثَ أَ", "تَ ثَ ثَ"] },
-                { page: 4, title: "Iqro 1: Pengenalan Huruf ج (JA)", items: ["جَ", "أَ جَ", "بَ جَ", "جَ تَ ثَ", "أَ بَ تَ ثَ جَ", "جَ أَ بَ", "تَ جَ ثَ", "جَ ثَ بَ", "ثَ جَ تَ", "أَ جَ ثَ"] }
-            ],
-            2: [
-                { page: 1, title: "Iqro 2: Huruf Sambung Awal & Tengah", items: ["بَـ", "تَـ", "ثَـ", "بَـتَ", "تَـثَ", "بَـثَ", "بَـتَـثَ", "تَـبَـثَ", "يَـثَـبَ", "ثَـبَـتَ"] },
-                { page: 2, title: "Iqro 2: Bentuk Sambung Huruf ج (JA) & ح (HA)", items: ["جَـ", "حَـ", "خَـ", "جَـحَ", "حَـخَ", "جَـحَـخَ", "بَـجَـدَ", "تَـحَـرَ", "ثَـخَـذَ", "جَـعَـلَ"] },
-                { page: 3, title: "Iqro 2: Mad Thabi'i (Panjang 2 Harakat Alif)", items: ["بَا", "تَا", "ثَا", "بَاتَ", "تَابَ", "ثَابَتَ", "جَادَ", "حَاسَدَ", "خَافَ", "جَعَالَ"] }
-            ],
-            3: [
-                { page: 1, title: "Iqro 3: Pengenalan Harakat Kasrah (I)", items: ["إِ", "بِي", "تِي", "ثِي", "إِبِلِ", "تِجَارَةِ", "كِتَابِ", "شَهِدَ", "عَلِمَ", "عَمِلَ"] },
-                { page: 2, title: "Iqro 3: Pengenalan Harakat Dhammah (U)", items: ["أُ", "بُ", "تُ", "ثُ", "كُتُبُ", "رُسُلُ", "جُعِلَ", "قُرِئَ", "كُتِبَ", "عُلِمَ"] },
-                { page: 3, title: "Iqro 3: Panjang Ya Sukun (I) & Wawu Sukun (U)", items: ["بِيـ", "تِيـ", "بُوو", "تُو", "قِيلَ", "يَقُولُ", "تَكُونُ", "سَبِيلِي", "عَلِيمٌ", "حَكِيمٌ"] }
-            ],
-            4: [
-                { page: 1, title: "Iqro 4: Pengenalan Tanwin (An, In, Un)", items: ["أً", "أٍ", "أٌ", "بً", "بٍ", "بٌ", "كِتَابًا", "كِتَابٍ", "كِتَابٌ", "عَلِيمًا"] },
-                { page: 2, title: "Iqro 4: Huruf Sukun / Mati (ْ)", items: ["أَبْ", "أَتْ", "أَثْ", "أَجْ", "يَكْتُبُ", "يَعْمَلُ", "يَذْهَبُ", "يَفْعَلُ", "أَنْعَمْتَ", "اَلْحَمْدُ"] },
-                { page: 3, title: "Iqro 4: Huruf Qalqalah (Pantulan: ب ج د ط ق)", items: ["أَقْ", "أَطْ", "أَبْ", "أَجْ", "أَدْ", "يَقْطَعُ", "يَجْعَلُ", "يَدْخُلُ", "أَسْبَاطًا", "أَطْعَمَهُمْ"] }
-            ],
-            5: [
-                { page: 1, title: "Iqro 5: Pengenalan Tasydid / Syaddah (ّ)", items: ["أَبَّ", "أَتَّ", "أَثَّ", "رَبَّنَا", "إِيَّاكَ", "ثُمَّ", "إِنَّ", "عَلَّمَ", "يُسَبِّحُ", "قَدَّمَتْ"] },
-                { page: 2, title: "Iqro 5: Hukum Idgham Bighunnah (Dengung)", items: ["مَنْ يَّقُولُ", "مِنْ وََّالٍ", "مِنْ نِّعْمَةٍ", "عَذَابٌ أَلِيمٌ", "خَيْرًا يَّرَهُ", "فَمَنْ يَّعْمَلْ"] },
-                { page: 3, title: "Iqro 5: Lafadz Allah (Tafkhim & Tarqiq)", items: ["اللَّهِ", "بِسْمِ اللَّهِ", "قُلْ هُوَ اللَّهُ", "إِنَّ اللَّهَ", "وَاللَّهُ", "مِنَ اللَّهِ"] }
-            ],
-            6: [
-                { page: 1, title: "Iqro 6: Ikhfa Hukumi (Samar Dengung)", items: ["مَنْ كَانَ", "إِنْ كُنْتُمْ", "مِنْ دُونِ", "عَنْ صَلَاتِهِمْ", "قَوْلًا سَدِيدًا", "أَنْدَادًا"] },
-                { page: 2, title: "Iqro 6: Mad Wajib & Mad Jaiz (Panjang 5-6 Harakat)", items: ["جَاءَ", "شَاءَ", "السَّمَاءِ", "يَا أَيُّهَا", "إِنَّا أَعْطَيْنَاكَ", "فِي أَحْسَنِ"] },
-                { page: 3, title: "Iqro 6: Latihan Bacaan Ayat Al-Qur'an Lengkap", items: ["قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ", "مِنْ شَرِّ مَا خَلَقَ", "وَإِلَٰهُكُمْ إِلَٰهٌ وَاحِدٌ", "الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ", "وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ"] }
-            ]
-        };
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
 
-        let currentJilid = 1;
-        let currentPageIndex = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+        });
 
-        function selectJilid(j) {
-            currentJilid = j;
-            currentPageIndex = 0;
-
-            document.querySelectorAll('.jilid-btn').forEach(b => b.className = "jilid-btn p-3 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-sm border border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white transition");
-            document.getElementById(`btnJ${j}`).className = "jilid-btn p-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow";
-
-            renderIqroPage();
-        }
-
-        function changePage(dir) {
-            const list = iqroDatabase[currentJilid] || iqroDatabase[1];
-            if (currentPageIndex + dir >= 0 && currentPageIndex + dir < list.length) {
-                currentPageIndex += dir;
-                renderIqroPage();
+        function initTheme() {
+            if (localStorage.theme === 'light') {
+                document.documentElement.classList.remove('dark');
+                themeIcon.textContent = '🌙';
+            } else {
+                document.documentElement.classList.add('dark');
+                themeIcon.textContent = '☀️';
             }
         }
 
-        function renderIqroPage() {
-            const list = iqroDatabase[currentJilid] || iqroDatabase[1];
-            const data = list[currentPageIndex] || list[0];
-
-            document.getElementById('iqroHeaderTitle').textContent = `Iqro ${currentJilid} — Halaman ${data.page}`;
-            document.getElementById('iqroHeaderDesc').textContent = data.title;
-
-            const grid = document.getElementById('iqroContentGrid');
-            grid.innerHTML = data.items.map(item => `
-                <div class="p-6 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-center hover:border-emerald-500 transition shadow-sm">
-                    <span class="font-arabic text-3xl sm:text-4xl text-slate-800 dark:text-slate-100 tracking-wide text-center leading-relaxed">${item}</span>
-                </div>
-            `).join('');
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        document.addEventListener('DOMContentLoaded', renderIqroPage);
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                themeIcon.textContent = '🌙';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                themeIcon.textContent = '☀️';
+            }
+        });
     </script>
 </body>
 </html>
