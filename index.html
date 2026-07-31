@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
@@ -42,7 +41,6 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 10px; }
 
-        /* KELAS TAJWID BERWARNA */
         .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }
         .tj-idgham { color: #10b981 !important; font-weight: bold; }
         .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }
@@ -50,7 +48,6 @@
         .tj-mad { color: #ec4899 !important; font-weight: 600; }
         .tj-silent { color: #9ca3af !important; }
 
-        /* ANIMASI KARAOKE HIGHLIGHT */
         .karaoke-active {
             border-color: #10b981 !important;
             background-color: rgba(16, 185, 129, 0.08) !important;
@@ -62,7 +59,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
 
-    <!-- 1. HEADER / NAVBAR (MINIMALIS & CLEAN) -->
+    <!-- 1. HEADER / NAVBAR -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
@@ -78,12 +75,10 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Tombol Cari -->
                 <button id="btnOpenSearch" onclick="openSearchModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     🔍
                 </button>
 
-                <!-- Avatar Profil Only (Klik Untuk Buka Profil & Pengaturan) -->
                 <button id="btnAuth" onclick="openAuthModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:ring-2 hover:ring-emerald-500 transition shadow-sm overflow-hidden p-0.5">
                     <span id="authBtnIcon" class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center text-lg">👤</span>
                 </button>
@@ -94,8 +89,47 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-5">
 
+        <!-- WIDGET JADWAL SHOLAT OTOMATIS BERDASARKAN LOKASI PERANGKAT -->
+        <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🕌</span>
+                    <div>
+                        <h3 class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">Jadwal Sholat Hari Ini</h3>
+                        <p id="userLocationText" class="text-[10px] text-slate-400">Mendeteksi lokasi Anda...</p>
+                    </div>
+                </div>
+                <button onclick="getUserLocation()" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-xl transition">
+                    🔄 Refresh Lokasi
+                </button>
+            </div>
+
+            <div class="grid grid-cols-5 gap-1.5 text-center text-xs" id="prayerTimesGrid">
+                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                    <p class="text-[10px] text-slate-400">Subuh</p>
+                    <p id="timeFajr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                </div>
+                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                    <p class="text-[10px] text-slate-400">Dzuhur</p>
+                    <p id="timeDhuhr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                </div>
+                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                    <p class="text-[10px] text-slate-400">Ashar</p>
+                    <p id="timeAsr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                </div>
+                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                    <p class="text-[10px] text-slate-400">Maghrib</p>
+                    <p id="timeMaghrib" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                </div>
+                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                    <p class="text-[10px] text-slate-400">Isya</p>
+                    <p id="timeIsha" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                </div>
+            </div>
+        </div>
+
         <!-- WIDGET BACAAN TERAKHIR -->
-        <div id="lastReadWidget" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-800 to-teal-700 text-white p-4 sm:p-5 rounded-2xl shadow-lg">
+        <div id="lastReadWidget" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-800 to-teal-700 text-white p-4 sm:p-5 rounded-3xl shadow-lg">
             <div class="flex justify-between items-center">
                 <div>
                     <span class="text-[10px] uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-full bg-white/20 text-emerald-100">
@@ -111,29 +145,29 @@
         </div>
 
         <!-- MENU NAVIGATION ICONS MOBILE COMPACT -->
-        <div class="bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+        <div class="bg-white dark:bg-darkCard p-3 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
             <div class="grid grid-cols-5 gap-2 text-center">
-                <button onclick="openSearchModal()" class="flex flex-col items-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <button onclick="openSearchModal()" class="flex flex-col items-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <span class="text-2xl">📖</span>
                     <span class="text-[10px] font-bold mt-1 text-slate-600 dark:text-slate-300">Quran</span>
                 </button>
 
-                <a href="/iqro.html" class="flex flex-col items-center p-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition border border-emerald-500/20">
+                <a href="/iqro.html" class="flex flex-col items-center p-2 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition border border-emerald-500/20">
                     <span class="text-2xl">📚</span>
                     <span class="text-[10px] font-bold mt-1">Iqro 1-6</span>
                 </a>
 
-                <button onclick="quickLoadSurah(36)" class="flex flex-col items-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <button onclick="quickLoadSurah(36)" class="flex flex-col items-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <span class="text-2xl">🕋</span>
                     <span class="text-[10px] font-bold mt-1 text-slate-600 dark:text-slate-300">Yasin</span>
                 </button>
 
-                <button onclick="quickLoadSurah(67)" class="flex flex-col items-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <button onclick="quickLoadSurah(67)" class="flex flex-col items-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <span class="text-2xl">🤲</span>
                     <span class="text-[10px] font-bold mt-1 text-slate-600 dark:text-slate-300">Mulk</span>
                 </button>
 
-                <button onclick="quickLoadSurah(18)" class="flex flex-col items-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <button onclick="quickLoadSurah(18)" class="flex flex-col items-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                     <span class="text-2xl">✨</span>
                     <span class="text-[10px] font-bold mt-1 text-slate-600 dark:text-slate-300">Kahfi</span>
                 </button>
@@ -149,9 +183,9 @@
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-pink-500 inline-block"></span> Mad</span>
         </div>
 
-        <!-- AREA BACA / DETAIL SURAH -->
+        <!-- AREA BACA / DETAIL SURAH DENGAN DESIGN BANNER DITERAPKAN LEBIH ELEGANKAN -->
         <section id="mainReadArea">
-            <div id="surahDetail" class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-6 min-h-[500px]">
+            <div id="surahDetail" class="bg-white dark:bg-darkCard rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-6 min-h-[500px]">
                 
                 <div id="placeholderView" class="text-center py-16 text-slate-400">
                     <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-emerald-500/10 flex items-center justify-center text-3xl">
@@ -160,28 +194,29 @@
                     <p class="text-xs font-medium">Klik tombol <span class="text-emerald-600 dark:text-emerald-400 font-bold cursor-pointer" onclick="openSearchModal()">Cari 🔍</span> untuk memilih Surah.</p>
                 </div>
 
+                <!-- DESIGN SURAH HEADER DI-DESAIN ULANG (LEBIH CLEAN & PRO) -->
                 <div id="surahHeader" class="hidden mb-6 text-center pb-6 border-b border-slate-200 dark:border-slate-800">
-                    <span id="activeSurahNumber" class="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span id="activeSurahNumber" class="text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         SURAH NO. -
                     </span>
                     <h2 id="activeSurahName" class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2 tracking-tight"></h2>
                     <p id="activeSurahTranslation" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></p>
                     
-                    <div class="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                    <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
                         <button id="btnPlayFullSurah" onclick="playModeSurah()" 
-                            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-2">
-                            <span>▶️</span>
-                            <span>Putar Full 1 Surah</span>
+                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <span>Putar 1 Surah</span>
                         </button>
 
                         <button onclick="playModeFirstAyat()" 
-                            class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center gap-2">
-                            <span>🔂</span>
-                            <span>Putar 1 Ayat Saja</span>
+                            class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 fill-current text-amber-500" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                            <span>Putar 1 Ayat</span>
                         </button>
 
                         <button id="btnStopAudio" onclick="stopAudio()" 
-                            class="px-3.5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl font-semibold text-xs transition hidden">
+                            class="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl font-semibold text-xs border border-rose-500/20 transition hidden flex items-center gap-1">
                             ⏹️ Stop
                         </button>
                     </div>
@@ -193,12 +228,23 @@
 
     </main>
 
-    <!-- MODAL AUTHENTICATION & PENGATURAN APLIKASI (INTEGRASI MULTI-FITUR) -->
+    <!-- FOOTER LINK PRIVACY & CONTACT -->
+    <footer class="max-w-4xl mx-auto px-4 py-6 text-center text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800/80 mt-auto space-y-2">
+        <div class="flex items-center justify-center gap-4 font-semibold">
+            <a href="/privacy.html" class="hover:text-emerald-500 transition">Kebijakan Privasi</a>
+            <span>•</span>
+            <a href="/contact.html" class="hover:text-emerald-500 transition">Kontak Kami</a>
+            <span>•</span>
+            <a href="/iqro.html" class="hover:text-emerald-500 transition">Buku Iqro</a>
+        </div>
+        <p>© 2026 Al-Qur'anul Karim Digital. Semua Hak Dilindungi.</p>
+    </footer>
+
+    <!-- MODAL AUTHENTICATION & PENGATURAN -->
     <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
 
-            <!-- Profile View (Jika Sudah Login) -->
             <div id="userProfileView" class="hidden text-center space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div id="userAvatarContainer" class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold overflow-hidden shadow-md">👤</div>
                 <div>
@@ -210,7 +256,6 @@
                 </button>
             </div>
 
-            <!-- Form Auth View (Jika Belum Login) -->
             <div id="authFormView" class="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div class="text-center">
                     <h3 id="authTitle" class="text-base font-bold text-slate-900 dark:text-slate-100">Masuk ke Akun</h3>
@@ -234,7 +279,6 @@
                     <span>⚙️</span> Pengaturan Aplikasi
                 </h4>
 
-                <!-- Dark Mode Row Toggle -->
                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <span class="font-semibold text-slate-700 dark:text-slate-300">🌙 Mode Gelap (Dark Mode)</span>
                     <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl border border-emerald-500/20">
@@ -242,7 +286,6 @@
                     </button>
                 </div>
 
-                <!-- Font Size Range Slider -->
                 <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1.5">
                     <div class="flex justify-between font-semibold text-slate-700 dark:text-slate-300">
                         <span>🔍 Ukuran Teks Terjemah</span>
@@ -423,6 +466,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             initTheme();
             restoreSettingsUI();
+            getUserLocation(); // Deteksi Lokasi untuk Sholat
             await checkOAuthCallback();
             updateUserUI();
             await fetchSurahList();
@@ -430,6 +474,51 @@
             setupAudioListeners();
             restoreSessionState();
         });
+
+        // -------------------------------------------------------------
+        // ENGINE JADWAL SHOLAT OTOMATIS DENGAN GEOLOCATION API
+        // -------------------------------------------------------------
+        function getUserLocation() {
+            const userLocText = document.getElementById('userLocationText');
+            userLocText.textContent = 'Mendeteksi koordinat lokasi...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        fetchPrayerTimesByCoords(lat, lng);
+                    },
+                    (error) => {
+                        // Fallback ke Surabaya / Indonesia jika lokasi ditolak
+                        fetchPrayerTimesByCoords(-7.2575, 112.7521, 'Surabaya (Default)');
+                    }
+                );
+            } else {
+                fetchPrayerTimesByCoords(-7.2575, 112.7521, 'Surabaya (Default)');
+            }
+        }
+
+        async function fetchPrayerTimesByCoords(lat, lng, cityName = null) {
+            const userLocText = document.getElementById('userLocationText');
+            try {
+                const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=2`);
+                const data = await res.json();
+                
+                if (data && data.data && data.data.timings) {
+                    const t = data.data.timings;
+                    document.getElementById('timeFajr').textContent = t.Fajr;
+                    document.getElementById('timeDhuhr').textContent = t.Dhuhr;
+                    document.getElementById('timeAsr').textContent = t.Asr;
+                    document.getElementById('timeMaghrib').textContent = t.Maghrib;
+                    document.getElementById('timeIsha').textContent = t.Isha;
+
+                    userLocText.textContent = cityName || `Lokasi Terdeteksi (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+                }
+            } catch (err) {
+                userLocText.textContent = 'Gagal memuat jadwal sholat.';
+            }
+        }
 
         function handleGoogleLogin() {
             const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
@@ -753,7 +842,6 @@
             localStorage.setItem('quran_playmode', playMode);
         });
 
-        // RENDER AYAT DENGAN IKON SVG MODERN DI BAGIAN KANAN ATAS
         function renderAyat(ayahs, surahName) {
             ayatContainer.innerHTML = ayahs.map((a, idx) => `
                 <div id="ayat-card-${idx}" class="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 transition-all duration-300">
@@ -764,19 +852,16 @@
                         </span>
                         
                         <div class="flex items-center gap-1.5">
-                            <!-- TOMBOL PLAY SVG MODERN -->
                             <button id="btnPlayAyat-${idx}" onclick="clickPlayAyatBtn(${idx})" class="w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition shadow-sm" title="Putar Audio">
                                 <span id="btnIconAyat-${idx}">
                                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </span>
                             </button>
 
-                            <!-- TOMBOL BOOKMARK SVG MODERN -->
                             <button onclick="saveBookmark(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center transition shadow-sm" title="Simpan Bookmark">
                                 <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
                             </button>
                             
-                            <!-- TOMBOL SHARE SVG MODERN -->
                             <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`, \`${a.textTrans.replace(/`/g, '')}\`)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center transition shadow-sm" title="Bagikan">
                                 <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                             </button>
@@ -795,7 +880,6 @@
             `).join('');
         }
 
-        // KARAOKE AUDIO SYNC ENGINE
         function setupAudioListeners() {
             globalAudio.addEventListener('ended', () => {
                 if (playMode === 'surah' && currentPlayingIndex < currentSurahData.length - 1) {
@@ -821,7 +905,6 @@
             globalAudio.src = item.audioUrl;
             globalAudio.play();
 
-            // Highlight Karaoke Card
             highlightAyatCard(index);
             audioBar.classList.remove('hidden');
             btnStopAudio.classList.remove('hidden');
@@ -906,7 +989,6 @@
             }
         }
 
-        // FUNGSI SHARE LENGKAP DENGAN TERJEMAHAN + HOOK LINK
         function shareAyat(surahName, ayatNo, textArab, textTrans) {
             const directUrl = `${window.location.origin}${window.location.pathname}#surah-${currentSurahNo}`;
             
