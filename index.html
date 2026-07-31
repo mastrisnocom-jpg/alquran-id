@@ -18,7 +18,7 @@
             }
         }
     </script>
-    <!-- SUPABASE SDK -->
+    <!-- SUPABASE SDK v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Scheherazade+New:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -164,7 +164,7 @@
 
             <div class="mt-4 text-center text-xs text-slate-400">
                 <span id="authToggleText">Belum punya akun?</span>
-                <button type="button" onclick="window.toggleAuthMode()" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
+                <button type="button" id="btnToggleAuth" onclick="window.toggleAuthMode()" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
                     Daftar Akun Baru
                 </button>
             </div>
@@ -173,9 +173,7 @@
 
     <!-- SCRIPT JAVASCRIPT MASTER UTUH -->
     <script>
-        console.log("Menjalankan script utama...");
-
-        // === FUNGSI KONTROL MODAL (Dibuat paling atas agar pasti berfungsi) ===
+        // FUNGSI MODAL PENGALAMATAN GLOBAL
         window.showAuthModal = function() {
             document.getElementById('authMsg').classList.add('hidden');
             document.getElementById('authModal').classList.remove('hidden');
@@ -212,24 +210,19 @@
             document.getElementById('themeIcon').textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
         };
 
-
-        // === INISIALISASI SUPABASE (DIBUAT AMAN) ===
+        // KREDENSIAL SUPABASE YANG DIPERBAIKI (MENGGUNAKAN JWT ANON KEY LAMA SANGAT COCOK DENGAN SDK CLIENT)
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc';
 
         let supabase = null;
         try {
-            if (window.supabase) {
+            if (window.supabase && window.supabase.createClient) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log("Supabase berhasil dimuat.");
-            } else {
-                console.warn("Script Supabase belum termuat dari CDN.");
             }
-        } catch (error) {
-            console.error("Gagal menginisialisasi Supabase:", error);
+        } catch (err) {
+            console.error("Gagal terhubung ke Supabase:", err);
         }
 
-        // === FUNGSI UPDATE UI LOGIN ===
         function updateAuthHeader(user) {
             const container = document.getElementById('authButtonContainer');
             if (!container) return;
@@ -255,7 +248,6 @@
             }
         }
 
-        // === LOGIKA LOGIN & REGISTER ===
         document.getElementById('authForm').onsubmit = async function(e) {
             e.preventDefault();
             const email = document.getElementById('authEmail').value.trim();
@@ -268,7 +260,7 @@
             msgEl.classList.add('hidden');
 
             try {
-                if (!supabase) throw new Error("Koneksi database (Supabase) terputus.");
+                if (!supabase) throw new Error("Terjadi kesalahan koneksi ke Supabase SDK.");
 
                 if (isRegister) {
                     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -290,7 +282,7 @@
             } catch (err) {
                 let errText = err.message || "Terjadi kesalahan.";
                 if (errText.includes("Invalid login")) errText = "Email atau password salah!";
-                if (errText.includes("Email not confirmed")) errText = "Email belum dikonfirmasi! Matikan fitur 'Confirm Email' di dashboard Supabase.";
+                if (errText.includes("Email not confirmed")) errText = "Email belum dikonfirmasi! Matikan 'Confirm Email' di dashboard Supabase.";
                 if (errText.includes("already registered")) errText = "Email ini sudah terdaftar.";
                 
                 msgEl.textContent = errText;
@@ -308,7 +300,6 @@
             }
         };
 
-        // === CEK SESI OTOMATIS ===
         async function checkUserSession() {
             if (supabase) {
                 try {
@@ -319,14 +310,13 @@
                         updateAuthHeader(session ? session.user : null);
                     });
                 } catch (e) {
-                    console.error("Gagal mengecek sesi login:", e);
+                    console.error("Gagal membaca sesi:", e);
                 }
             }
         }
         checkUserSession();
 
-
-        // === API AL-QURAN & TAJWID ===
+        // INTEGRASI AL-QURAN CLOUD API
         window.allSurahs = [];
         let currentSurahNo = null;
         let selectedLang = 'id.indonesian';
@@ -337,9 +327,7 @@
                 const res = await fetch('https://api.alquran.cloud/v1/surah');
                 const data = await res.json();
                 window.allSurahs = data.data;
-            } catch (err) {
-                console.error("Gagal mengambil data surah:", err);
-            }
+            } catch (err) {}
         }
         fetchSurahs();
 
@@ -431,7 +419,7 @@
                     </div>
                 `).join('');
             } catch (err) {
-                ayatContainer.innerHTML = `<p class="text-red-400 text-center text-xs">Gagal memuat ayat. Periksa koneksi internet Anda.</p>`;
+                ayatContainer.innerHTML = `<p class="text-red-400 text-center text-xs">Gagal memuat ayat.</p>`;
             }
         }
 
