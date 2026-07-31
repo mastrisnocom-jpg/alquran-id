@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
@@ -41,6 +42,7 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 10px; }
 
+        /* KELAS TAJWID BERWARNA */
         .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }
         .tj-idgham { color: #10b981 !important; font-weight: bold; }
         .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }
@@ -48,11 +50,11 @@
         .tj-mad { color: #ec4899 !important; font-weight: 600; }
         .tj-silent { color: #9ca3af !important; }
 
-        /* KARAOKE HIGHLIGHT ANIMATION */
+        /* ANIMASI KARAOKE HIGHLIGHT */
         .karaoke-active {
             border-color: #10b981 !important;
             background-color: rgba(16, 185, 129, 0.08) !important;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+            box-shadow: 0 0 22px rgba(16, 185, 129, 0.22);
             transform: scale(1.01);
             transition: all 0.3s ease-in-out;
         }
@@ -81,7 +83,7 @@
                     🔍
                 </button>
 
-                <!-- Photo Avatar Only (Klik Untuk Buka Profil & Pengaturan) -->
+                <!-- Avatar Profil Only (Klik Untuk Buka Profil & Pengaturan) -->
                 <button id="btnAuth" onclick="openAuthModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:ring-2 hover:ring-emerald-500 transition shadow-sm overflow-hidden p-0.5">
                     <span id="authBtnIcon" class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center text-lg">👤</span>
                 </button>
@@ -191,12 +193,12 @@
 
     </main>
 
-    <!-- MODAL AUTHENTICATION & PENGATURAN APLIKASI (DISATUKAN DENGAN ELEGAN) -->
+    <!-- MODAL AUTHENTICATION & PENGATURAN APLIKASI (INTEGRASI MULTI-FITUR) -->
     <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
 
-            <!-- User Info View (Jika Sudah Login) -->
+            <!-- Profile View (Jika Sudah Login) -->
             <div id="userProfileView" class="hidden text-center space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div id="userAvatarContainer" class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold overflow-hidden shadow-md">👤</div>
                 <div>
@@ -226,13 +228,13 @@
                 </button>
             </div>
 
-            <!-- SECTION PENGATURAN INTEGRASI DENGAN DARK MODE -->
+            <!-- PENGATURAN INTEGRASI -->
             <div class="pt-4 space-y-3 text-xs">
                 <h4 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                     <span>⚙️</span> Pengaturan Aplikasi
                 </h4>
 
-                <!-- Dark Mode Toggle Row -->
+                <!-- Dark Mode Row Toggle -->
                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <span class="font-semibold text-slate-700 dark:text-slate-300">🌙 Mode Gelap (Dark Mode)</span>
                     <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl border border-emerald-500/20">
@@ -240,13 +242,13 @@
                     </button>
                 </div>
 
-                <!-- Slider Ukuran Teks Terjemahan -->
+                <!-- Font Size Range Slider -->
                 <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1.5">
                     <div class="flex justify-between font-semibold text-slate-700 dark:text-slate-300">
                         <span>🔍 Ukuran Teks Terjemah</span>
                         <span id="fontSizeVal" class="text-emerald-600 dark:text-emerald-400 font-bold">14px</span>
                     </div>
-                    <input type="range" id="fontSizeSlider" min="12" max="22" value="14" class="w-full accent-emerald-500 cursor-pointer">
+                    <input type="range" id="fontSizeSlider" min="12" max="24" value="14" class="w-full accent-emerald-500 cursor-pointer">
                 </div>
 
                 <div>
@@ -580,7 +582,6 @@
             fontSizeVal.textContent = `${currentFontSize}px`;
             localStorage.setItem('quran_font_size', currentFontSize);
             
-            // Terapkan ukuran font terjemahan secara realtime
             document.querySelectorAll('.trans-text').forEach(el => {
                 el.style.fontSize = `${currentFontSize}px`;
             });
@@ -752,7 +753,7 @@
             localStorage.setItem('quran_playmode', playMode);
         });
 
-        // RENDER AYAT (TOMBOL AUDIO DIPINDAH KE ATAS, TEKS "PUTAR AUDIO" DIHAPUS)
+        // RENDER AYAT DENGAN IKON SVG MODERN DI BAGIAN KANAN ATAS
         function renderAyat(ayahs, surahName) {
             ayatContainer.innerHTML = ayahs.map((a, idx) => `
                 <div id="ayat-card-${idx}" class="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 transition-all duration-300">
@@ -762,18 +763,22 @@
                             ${a.numberInSurah}
                         </span>
                         
-                        <div class="flex items-center gap-2">
-                            <!-- TOMBOL PUTAR AUDIO (IKON SAJA) DIPINDAH KE KANAN ATAS -->
-                            <button id="btnPlayAyat-${idx}" onclick="clickPlayAyatBtn(${idx})" class="w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs transition">
-                                <span id="btnIconAyat-${idx}">▶️</span>
+                        <div class="flex items-center gap-1.5">
+                            <!-- TOMBOL PLAY SVG MODERN -->
+                            <button id="btnPlayAyat-${idx}" onclick="clickPlayAyatBtn(${idx})" class="w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition shadow-sm" title="Putar Audio">
+                                <span id="btnIconAyat-${idx}">
+                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </span>
                             </button>
 
-                            <button onclick="saveBookmark(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center text-xs transition" title="Simpan Bookmark">
-                                📌
+                            <!-- TOMBOL BOOKMARK SVG MODERN -->
+                            <button onclick="saveBookmark(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center transition shadow-sm" title="Simpan Bookmark">
+                                <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
                             </button>
                             
-                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center text-xs transition" title="Bagikan">
-                                🔗
+                            <!-- TOMBOL SHARE SVG MODERN -->
+                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`, \`${a.textTrans.replace(/`/g, '')}\`)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center transition shadow-sm" title="Bagikan">
+                                <svg class="w-4 h-4 stroke-current fill-none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                             </button>
                         </div>
                     </div>
@@ -816,7 +821,7 @@
             globalAudio.src = item.audioUrl;
             globalAudio.play();
 
-            // Efek Karaoke Highlight
+            // Highlight Karaoke Card
             highlightAyatCard(index);
             audioBar.classList.remove('hidden');
             btnStopAudio.classList.remove('hidden');
@@ -827,7 +832,6 @@
 
             updateAudioUIState();
             
-            // Auto Scroll Ke Ayat Yg Sedang Dibaca
             const targetEl = document.getElementById(`ayat-card-${index}`);
             if (targetEl) { targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         }
@@ -853,7 +857,7 @@
             if (currentPlayingIndex !== -1) {
                 const btnIcon = document.getElementById(`btnIconAyat-${currentPlayingIndex}`);
                 if (btnIcon) {
-                    btnIcon.textContent = isPaused ? '▶️' : '⏸️';
+                    btnIcon.innerHTML = isPaused ? `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>` : `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
                 }
             }
         }
@@ -862,14 +866,14 @@
             const card = document.getElementById(`ayat-card-${index}`);
             const btnIcon = document.getElementById(`btnIconAyat-${index}`);
             if (card) { card.classList.add('karaoke-active'); }
-            if (btnIcon) { btnIcon.textContent = '⏸️'; }
+            if (btnIcon) { btnIcon.innerHTML = `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`; }
         }
 
         function resetAyatCardUI(index) {
             const card = document.getElementById(`ayat-card-${index}`);
             const btnIcon = document.getElementById(`btnIconAyat-${index}`);
             if (card) { card.classList.remove('karaoke-active'); }
-            if (btnIcon) { btnIcon.textContent = '▶️'; }
+            if (btnIcon) { btnIcon.innerHTML = `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`; }
         }
 
         async function saveBookmark(surahNo, surahName, ayatNo) {
@@ -902,13 +906,20 @@
             }
         }
 
-        function shareAyat(surahName, ayatNo, textArab) {
-            const text = `Al-Qur'an - ${surahName} Ayat ${ayatNo}:\n\n"${textArab}"`;
+        // FUNGSI SHARE LENGKAP DENGAN TERJEMAHAN + HOOK LINK
+        function shareAyat(surahName, ayatNo, textArab, textTrans) {
+            const directUrl = `${window.location.origin}${window.location.pathname}#surah-${currentSurahNo}`;
+            
+            const shareText = `*Al-Qur'an - ${surahName} Ayat ${ayatNo}*\n\n"${textArab}"\n\n*Artinya:*\n"${textTrans}"\n\n📖 *Baca, dengarkan murottal merdu, dan pelajari tajwid berwarna lengkap di sini:*\n${directUrl}`;
+
             if (navigator.share) {
-                navigator.share({ title: `${surahName}:${ayatNo}`, text: text, url: window.location.href });
+                navigator.share({
+                    title: `${surahName} : Ayat ${ayatNo}`,
+                    text: shareText
+                }).catch(() => {});
             } else {
-                navigator.clipboard.writeText(text);
-                alert('Teks ayat disalin!');
+                navigator.clipboard.writeText(shareText);
+                alert('Teks ayat beserta terjemahan dan link berhasil disalin!');
             }
         }
     </script>
