@@ -41,7 +41,8 @@
         }
         .font-arabic {
             font-family: 'Scheherazade New', serif;
-            line-height: 2.3;
+            line-height: 2.4;
+            direction: rtl;
         }
         ::-webkit-scrollbar {
             width: 5px;
@@ -51,13 +52,13 @@
             border-radius: 10px;
         }
 
-        /* ATURAN WARNA TAJWID RESPONSIF */
-        .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }      /* Ikhfa: Merah */
-        .tj-idgham { color: #10b981 !important; font-weight: bold; }     /* Idgham / Ghunnah: Hijau */
-        .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }   /* Qalqalah: Biru */
-        .tj-iqlab { color: #f59e0b !important; font-weight: bold; }      /* Iqlab: Oranye */
-        .tj-mad { color: #ec4899 !important; }                        /* Mad: Merah Muda / Pink */
-        .tj-silent { color: #9ca3af !important; }                     /* Hamzah Wasal / Sukun / Silent: Abu-abu */
+        /* PALETA WARNA TAJWID TERSTANDAR & RAPI */
+        .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }      /* Merah */
+        .tj-idgham { color: #10b981 !important; font-weight: bold; }     /* Hijau */
+        .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }   /* Biru */
+        .tj-iqlab { color: #f59e0b !important; font-weight: bold; }      /* Oranye */
+        .tj-mad { color: #ec4899 !important; font-weight: 600; }         /* Pink */
+        .tj-silent { color: #9ca3af !important; }                     /* Abu-abu */
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
@@ -174,7 +175,7 @@
                 </select>
             </div>
 
-            <!-- TAJWID BERWARNA SELECT -->
+            <!-- TAJWID SELECT -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🎨 Tajwid:</span>
                 <select id="tajweedSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
@@ -475,20 +476,15 @@
             initTheme();
             restoreSettingsUI();
             
-            // 1. Tangkap Token Google OAuth
             await checkOAuthCallback();
-            
-            // 2. Render UI User
             updateUserUI();
 
-            // 3. Muat Data Al-Qur'an
             await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
             restoreSessionState();
         });
 
-        // HANDLER GOOGLE LOGIN
         function handleGoogleLogin() {
             const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
             window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
@@ -514,8 +510,6 @@
                         if (user && user.id) {
                             currentUserSession = { access_token: accessToken, user: user };
                             localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
-                            
-                            // Bersihkan URL Hash agar tidak merusak navigasi surah
                             history.replaceState(null, null, window.location.pathname);
                         }
                     } catch (err) {
@@ -525,7 +519,6 @@
             }
         }
 
-        // AUTH UI HANDLERS
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
                 const userObj = currentUserSession.user;
@@ -612,7 +605,6 @@
             alert('Berhasil Keluar.');
         }
 
-        // QURAN ENGINE
         function restoreSettingsUI() {
             langSelect.value = selectedLang;
             qoriSelect.value = selectedQori;
@@ -710,32 +702,47 @@
             return arabicPattern.test(text);
         }
 
-        // FUNGSI PARSER KODE TAJWID DENGAN CLEANER LENGKAP
+        // ========================================================
+        // PARSER TAJWID ULTIMATE & SUPREME CLEANER (BEBAS DARI KURUNG SIKU DAN ANGKA)
+        // ========================================================
         function parseTajweedCode(text) {
             if (!text) return '';
-            let parsed = text;
 
-            // 1. Ubah Tag Pembuka Tajwid berpola [kode:id[ atau [kode[ menjadi HTML span
-            parsed = parsed.replace(/\[f(:[0-9]+)?\[/g, '<span class="tj-ikhfa">');      // f = Ikhfa (Merah)
-            parsed = parsed.replace(/\[n(:[0-9]+)?\[/g, '<span class="tj-idgham">');     // n = Ghunnah (Hijau)
-            parsed = parsed.replace(/\[m(:[0-9]+)?\[/g, '<span class="tj-idgham">');     // m = Idgham (Hijau)
-            parsed = parsed.replace(/\[q(:[0-9]+)?\[/g, '<span class="tj-qalqalah">');   // q = Qalqalah (Biru)
-            parsed = parsed.replace(/\[p(:[0-9]+)?\[/g, '<span class="tj-iqlab">');      // p = Iqlab (Oranye)
-            parsed = parsed.replace(/\[c(:[0-9]+)?\[/g, '<span class="tj-mad">');        // c = Mad (Pink)
-            parsed = parsed.replace(/\[w(:[0-9]+)?\[/g, '<span class="tj-mad">');        // w = Mad (Pink)
-            parsed = parsed.replace(/\[a(:[0-9]+)?\[/g, '<span class="tj-mad">');        // a = Mad (Pink)
-            parsed = parsed.replace(/\[o(:[0-9]+)?\[/g, '<span class="tj-mad">');        // o = Mad (Pink)
-            parsed = parsed.replace(/\[h(:[0-9]+)?\[/g, '<span class="tj-silent">');     // h = Hamzah Wasal (Abu-abu)
-            parsed = parsed.replace(/\[s(:[0-9]+)?\[/g, '<span class="tj-silent">');     // s = Sukun/Silent (Abu-abu)
+            let str = text;
 
-            // 2. Bersihkan tag ID bertingkat aneh seperti [1], [2], dll dari API
-            parsed = parsed.replace(/\[[0-9]+\]/g, '');
-            parsed = parsed.replace(/\[[0-9]+\[/g, '');
+            // 1. Bersihkan semua pola angka ID murni seperti [1], [2], [10108], [11200]
+            str = str.replace(/\[\d+\]/g, '');
 
-            // 3. Ubah kurung siku penutup ']' menjadi </span>
-            parsed = parsed.replace(/\]/g, '</span>');
+            // 2. Map Kategori Tajwid ke CSS Span
+            // Ikhfa (f) -> Merah
+            str = str.replace(/\[f:\d+\[/g, '<span class="tj-ikhfa">').replace(/\[f\[/g, '<span class="tj-ikhfa">');
+            
+            // Idgham / Ghunnah (n, m) -> Hijau
+            str = str.replace(/\[n:\d+\[/g, '<span class="tj-idgham">').replace(/\[n\[/g, '<span class="tj-idgham">');
+            str = str.replace(/\[m:\d+\[/g, '<span class="tj-idgham">').replace(/\[m\[/g, '<span class="tj-idgham">');
+            
+            // Qalqalah (q) -> Biru
+            str = str.replace(/\[q:\d+\[/g, '<span class="tj-qalqalah">').replace(/\[q\[/g, '<span class="tj-qalqalah">');
+            
+            // Iqlab (p) -> Oranye
+            str = str.replace(/\[p:\d+\[/g, '<span class="tj-iqlab">').replace(/\[p\[/g, '<span class="tj-iqlab">');
+            
+            // Mad (c, w, a, o, i) -> Pink
+            str = str.replace(/\[[cwaoi]:\d+\[/g, '<span class="tj-mad">').replace(/\[[cwaoi]\[/g, '<span class="tj-mad">');
+            
+            // Silent / Hamzah Wasal (h, s, l) -> Abu-abu
+            str = str.replace(/\[[hsl]:\d+\[/g, '<span class="tj-silent">').replace(/\[[hsl]\[/g, '<span class="tj-silent">');
 
-            return parsed;
+            // 3. Tangani pola sisa seperti [1[ atau [angka[
+            str = str.replace(/\[\d+\[/g, '');
+
+            // 4. Ubah kurung siku penutup ']' menjadi </span>
+            str = str.replace(/\]/g, '</span>');
+
+            // 5. Sapu bersih jika ada sisa kurung siku liar
+            str = str.replace(/\[/g, '').replace(/\]/g, '');
+
+            return str;
         }
 
         async function loadSurah(surahNo) {
@@ -782,7 +789,7 @@
                         if (containsArabic(latinText)) latinText = '';
                     }
 
-                    // Parse tajwid jika opsi Berwarna diaktifkan
+                    // Format Tajwid
                     let formattedArab = ayah.text;
                     if (isTajweedEnabled) {
                         formattedArab = parseTajweedCode(ayah.text);
