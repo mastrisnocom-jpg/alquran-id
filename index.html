@@ -52,8 +52,9 @@
             <div class="flex items-center gap-2">
                 <button id="btnOpenSearch" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
+                <!-- Container Tombol Auth -->
                 <div id="authButtonContainer">
-                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button type="button" onclick="showAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
@@ -145,7 +146,7 @@
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="authModalTitle" class="text-base font-bold text-emerald-600 dark:text-emerald-400">Masuk ke Akun</h3>
-                <button id="btnCloseAuth" onclick="closeAuthModal()" class="text-slate-400 text-lg">✕</button>
+                <button type="button" onclick="hideAuthModal()" class="text-slate-400 text-lg hover:text-slate-600 dark:hover:text-slate-200">✕</button>
             </div>
 
             <!-- Error Notif Text -->
@@ -168,7 +169,7 @@
 
             <div class="mt-4 text-center text-xs text-slate-400">
                 <span id="authToggleText">Belum punya akun?</span>
-                <button type="button" id="btnToggleAuth" onclick="toggleAuthMode()" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
+                <button type="button" id="btnToggleAuth" onclick="switchAuthMode()" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
                     Daftar Akun Baru
                 </button>
             </div>
@@ -177,11 +178,10 @@
 
     <!-- JavaScript Master Script -->
     <script>
-        // 1. KREDENSIAL SUPABASE
+        // Supabase Client
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy';
         
-        // Inisialisasi Supabase Client dengan Opsi Auth Persist
         const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 persistSession: true,
@@ -227,18 +227,32 @@
             setupEventListeners();
         });
 
-        // --- SISTEM AUTHENTICATION FIX ---
-        async function setupAuthAndSession() {
-            if (!supabase) {
-                console.error("Supabase SDK belum siap.");
-                return;
-            }
+        // 1. FUNGSI DIJAMIN BISA MEMBUKA & MENUTUP MODAL AUTH
+        window.showAuthModal = function() {
+            authMsg.classList.add('hidden');
+            authModal.classList.remove('hidden');
+        };
 
-            // Cek Sesi Aktif
+        window.hideAuthModal = function() {
+            authModal.classList.add('hidden');
+        };
+
+        window.switchAuthMode = function() {
+            isRegisterMode = !isRegisterMode;
+            authMsg.classList.add('hidden');
+            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
+            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
+            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
+        };
+
+        // 2. SISTEM AUTHENTICATION
+        async function setupAuthAndSession() {
+            if (!supabase) return;
+
             const { data: { session } } = await supabase.auth.getSession();
             updateUserUI(session ? session.user : null);
 
-            // Subscriber Status Change Realtime
             supabase.auth.onAuthStateChange((event, session) => {
                 updateUserUI(session ? session.user : null);
             });
@@ -252,7 +266,7 @@
                 container.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="text-[11px] text-slate-500 dark:text-slate-400 max-w-[90px] truncate">${user.email}</span>
-                        <button onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition">
+                        <button type="button" onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition">
                             Keluar
                         </button>
                     </div>`;
@@ -260,30 +274,12 @@
                 loadBookmarkFromSupabase();
             } else {
                 container.innerHTML = `
-                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button type="button" onclick="showAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>`;
                 lastReadWidget.classList.add('hidden');
             }
         }
-
-        window.openAuthModal = function() {
-            authMsg.classList.add('hidden');
-            authModal.classList.remove('hidden');
-        };
-
-        window.closeAuthModal = function() {
-            authModal.classList.add('hidden');
-        };
-
-        window.toggleAuthMode = function() {
-            isRegisterMode = !isRegisterMode;
-            authMsg.classList.add('hidden');
-            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
-            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
-            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
-            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
-        };
 
         authForm.onsubmit = async (e) => {
             e.preventDefault();
@@ -303,14 +299,14 @@
                     const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) throw error;
 
-                    showAuthMessage("Pendaftaran berhasil! Silakan langsung login.", false);
-                    toggleAuthMode();
+                    showAuthMessage("Pendaftaran berhasil! Silakan coba masuk.", false);
+                    switchAuthMode();
                 } else {
                     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                     if (error) throw error;
 
                     showAuthMessage("Berhasil masuk!", false);
-                    setTimeout(() => closeAuthModal(), 1000);
+                    setTimeout(() => hideAuthModal(), 800);
                 }
             } catch (err) {
                 showAuthMessage(err.message, true);
@@ -333,11 +329,11 @@
             }
         };
 
-        // --- SISTEM BOOKMARK CLOUD ---
+        // 3. BOOKMARK CLOUD
         window.saveBookmarkToSupabase = async function(surahNo, surahName, ayatNo) {
             if (!currentUser) {
                 alert('Silakan MASUK/LOGIN terlebih dahulu untuk menyimpan bookmark.');
-                openAuthModal();
+                showAuthModal();
                 return;
             }
 
@@ -387,7 +383,7 @@
             }
         }
 
-        // --- APP HELPER FUNCTIONS ---
+        // 4. APP HELPER FUNCTIONS
         function setupTheme() {
             const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) {
