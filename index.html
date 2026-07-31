@@ -103,42 +103,56 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-5">
 
-        <!-- WIDGET JADWAL SHOLAT -->
-        <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">🕌</span>
+        <!-- WIDGET JADWAL SHOLAT (HIJAU + KEMENAG + JAM DIGITAL) -->
+        <div class="bg-gradient-to-br from-emerald-800 via-emerald-900 to-teal-950 p-4 sm:p-5 rounded-3xl shadow-lg text-white space-y-4 border border-emerald-700/50 relative overflow-hidden">
+            
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl p-2 rounded-2xl bg-white/10 backdrop-blur-sm">🕌</span>
                     <div>
-                        <h3 class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">Jadwal Sholat Hari Ini</h3>
-                        <p id="userLocationText" class="text-[10px] text-slate-400">Mendeteksi lokasi Anda...</p>
+                        <h3 class="font-bold text-xs sm:text-sm text-emerald-100 flex items-center gap-1.5">
+                            Jadwal Sholat Kemenag RI
+                        </h3>
+                        <p id="userLocationText" class="text-[10px] text-emerald-300/80">Mendeteksi lokasi...</p>
                     </div>
                 </div>
-                <button onclick="getUserLocation()" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-xl transition">
-                    🔄 Refresh
-                </button>
+
+                <!-- JAM REAL-TIME SESUAI PERANGKAT -->
+                <div class="text-right">
+                    <div id="liveDeviceClock" class="font-mono font-bold text-lg sm:text-xl text-emerald-300 tracking-wider">00:00:00</div>
+                    <p id="liveDeviceDate" class="text-[9px] text-emerald-200/70 font-medium"></p>
+                </div>
             </div>
 
-            <div class="grid grid-cols-5 gap-1.5 text-center text-xs" id="prayerTimesGrid">
-                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                    <p class="text-[10px] text-slate-400">Subuh</p>
-                    <p id="timeFajr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+            <!-- GRID WAKTU SHOLAT -->
+            <div class="grid grid-cols-5 gap-2 text-center text-xs" id="prayerTimesGrid">
+                <div class="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
+                    <p class="text-[10px] text-emerald-200/80 font-medium">Subuh</p>
+                    <p id="timeFajr" class="font-bold text-white mt-1 text-xs sm:text-sm">--:--</p>
                 </div>
-                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                    <p class="text-[10px] text-slate-400">Dzuhur</p>
-                    <p id="timeDhuhr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                <div class="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
+                    <p class="text-[10px] text-emerald-200/80 font-medium">Dzuhur</p>
+                    <p id="timeDhuhr" class="font-bold text-white mt-1 text-xs sm:text-sm">--:--</p>
                 </div>
-                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                    <p class="text-[10px] text-slate-400">Ashar</p>
-                    <p id="timeAsr" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                <div class="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
+                    <p class="text-[10px] text-emerald-200/80 font-medium">Ashar</p>
+                    <p id="timeAsr" class="font-bold text-white mt-1 text-xs sm:text-sm">--:--</p>
                 </div>
-                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                    <p class="text-[10px] text-slate-400">Maghrib</p>
-                    <p id="timeMaghrib" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                <div class="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
+                    <p class="text-[10px] text-emerald-200/80 font-medium">Maghrib</p>
+                    <p id="timeMaghrib" class="font-bold text-white mt-1 text-xs sm:text-sm">--:--</p>
                 </div>
-                <div class="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                    <p class="text-[10px] text-slate-400">Isya</p>
-                    <p id="timeIsha" class="font-bold text-slate-800 dark:text-slate-100 mt-0.5">--:--</p>
+                <div class="p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
+                    <p class="text-[10px] text-emerald-200/80 font-medium">Isya</p>
+                    <p id="timeIsha" class="font-bold text-white mt-1 text-xs sm:text-sm">--:--</p>
                 </div>
+            </div>
+            
+            <div class="flex justify-between items-center text-[9px] text-emerald-300/70 pt-1">
+                <span class="flex items-center gap-1">📍 Berdasarkan Koordinat Terdekat</span>
+                <button onclick="getUserLocation()" class="hover:text-white transition underline font-semibold flex items-center gap-1">
+                    🔄 Refresh Lokasi
+                </button>
             </div>
         </div>
 
@@ -500,6 +514,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             initTheme();
             restoreSettingsUI();
+            startDeviceClock();
             getUserLocation();
             await checkOAuthCallback();
             updateUserUI();
@@ -509,6 +524,23 @@
             setupToggleListeners();
             await restoreSessionState();
         });
+
+        // JAM REAL-TIME SESUAI PERANGKAT
+        function startDeviceClock() {
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                
+                document.getElementById('liveDeviceClock').textContent = `${hours}:${minutes}:${seconds}`;
+
+                const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+                document.getElementById('liveDeviceDate').textContent = now.toLocaleDateString('id-ID', options);
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
 
         function setupToggleListeners() {
             toggleTajweedSwitch.addEventListener('change', (e) => {
@@ -553,6 +585,7 @@
             if (currentSurahNo) loadSurah(currentSurahNo);
         }
 
+        // LOKASI & API JADWAL SHOLAT KEMENAG RI / MYQURAN
         function getUserLocation() {
             const userLocText = document.getElementById('userLocationText');
             userLocText.textContent = 'Mendeteksi koordinat...';
@@ -562,30 +595,50 @@
                     (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
-                        fetchPrayerTimesByCoords(lat, lng);
+                        fetchKemenagPrayerTimes(lat, lng);
                     },
-                    (error) => { fetchPrayerTimesByCoords(-7.2575, 112.7521, 'Surabaya (Default)'); }
+                    (error) => { fetchKemenagPrayerTimes(-7.2575, 112.7521, 'Surabaya'); }
                 );
-            } else { fetchPrayerTimesByCoords(-7.2575, 112.7521, 'Surabaya (Default)'); }
+            } else { fetchKemenagPrayerTimes(-7.2575, 112.7521, 'Surabaya'); }
         }
 
-        async function fetchPrayerTimesByCoords(lat, lng, cityName = null) {
+        async function fetchKemenagPrayerTimes(lat, lng, cityName = null) {
             const userLocText = document.getElementById('userLocationText');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+
             try {
-                const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=2`);
-                const data = await res.json();
+                // 1. Cari ID Kota terdekat berdasarkan koordinat via myQuran API (Standard Kemenag)
+                let kotaId = '1638'; // Default Surabaya
                 
-                if (data && data.data && data.data.timings) {
-                    const t = data.data.timings;
-                    document.getElementById('timeFajr').textContent = t.Fajr;
-                    document.getElementById('timeDhuhr').textContent = t.Dhuhr;
-                    document.getElementById('timeAsr').textContent = t.Asr;
-                    document.getElementById('timeMaghrib').textContent = t.Maghrib;
-                    document.getElementById('timeIsha').textContent = t.Isha;
+                try {
+                    const resCity = await fetch(`https://api.myquran.com/v2/sholat/kota/lokasi/${lat}/${lng}`);
+                    const dataCity = await resCity.json();
+                    if (dataCity.status && dataCity.data && dataCity.data.id) {
+                        kotaId = dataCity.data.id;
+                        cityName = dataCity.data.lokasi;
+                    }
+                } catch(e) { console.warn('City lookup fallback'); }
+
+                // 2. Ambil Jadwal Sholat Kemenag berdasarkan ID Kota
+                const resJadwal = await fetch(`https://api.myquran.com/v2/sholat/jadwal/${kotaId}/${year}/${month}/${date}`);
+                const dataJadwal = await resJadwal.json();
+
+                if (dataJadwal.status && dataJadwal.data && dataJadwal.data.jadwal) {
+                    const j = dataJadwal.data.jadwal;
+                    document.getElementById('timeFajr').textContent = j.subuh;
+                    document.getElementById('timeDhuhr').textContent = j.dzuhur;
+                    document.getElementById('timeAsr').textContent = j.ashar;
+                    document.getElementById('timeMaghrib').textContent = j.maghrib;
+                    document.getElementById('timeIsha').textContent = j.isya;
 
                     userLocText.textContent = cityName || `Terdeteksi (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
                 }
-            } catch (err) { userLocText.textContent = 'Gagal memuat jadwal sholat.'; }
+            } catch (err) {
+                userLocText.textContent = 'Gagal memuat jadwal Kemenag.';
+            }
         }
 
         function handleGoogleLogin() {
@@ -867,7 +920,6 @@
         }
 
         async function restoreSessionState() {
-            // Check redirect path dari file 404.html jika ada
             let path = sessionStorage.getItem('redirect_path') || window.location.pathname;
             sessionStorage.removeItem('redirect_path');
 
