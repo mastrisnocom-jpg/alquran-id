@@ -35,9 +35,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Scheherazade+New:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Supabase JS Client CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -253,17 +250,6 @@
                     <p id="authSubtitle" class="text-xs text-slate-400 mt-1">Simpan bookmark dan surah favorit ke cloud.</p>
                 </div>
 
-                <button onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-2">
-                    <span>🔑</span>
-                    <span>Lanjutkan dengan Google</span>
-                </button>
-
-                <div class="flex items-center my-3">
-                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-                    <span class="px-3 text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Atau</span>
-                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-                </div>
-
                 <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Email</label>
@@ -334,24 +320,62 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // CONFIG SUPABASE
+        // CONFIG KREDENSIAL SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
-        
-        let supabase = null;
+        const SUPABASE_ANON_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
 
-        function initSupabase() {
-            try {
-                if (window.supabase && typeof window.supabase.createClient === 'function') {
-                    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                }
-            } catch (e) {
-                console.warn('Inisialisasi Supabase terlewati:', e);
+        // REST API DIRECT SUPABASE FETCH ENGINE (Bebas dari Masalah SDK CDN)
+        const SupabaseApi = {
+            async signUp(email, password) {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.msg || data.message || data.error_description || 'Gagal daftar');
+                return data;
+            },
+
+            async signIn(email, password) {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error_description || data.msg || data.message || 'Gagal login');
+                return data;
+            },
+
+            async upsertBookmark(token, userId, surahNo, surahName, ayatNo) {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookmarks`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        surah_no: surahNo,
+                        surah_name: surahName,
+                        ayat_no: ayatNo,
+                        updated_at: new Date()
+                    })
+                });
+                return response.ok;
             }
-            return null;
-        }
+        };
 
-        let currentUser = null;
+        let currentUserSession = JSON.parse(localStorage.getItem('supabase_user_session') || 'null');
         let isSignUpMode = false;
 
         // State Quran App
@@ -401,36 +425,21 @@
         const btnContinue = document.getElementById('btnContinue');
 
         document.addEventListener('DOMContentLoaded', async () => {
-            supabase = initSupabase();
             initTheme();
             restoreSettingsUI();
-            checkUserSession();
+            updateUserUI();
             await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
             restoreSessionState();
         });
 
-        // AUTHENTICATION HANDLERS
-        async function checkUserSession() {
-            if (!supabase) return;
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                updateUserUI(session ? session.user : null);
-
-                supabase.auth.onAuthStateChange((_event, session) => {
-                    updateUserUI(session ? session.user : null);
-                });
-            } catch (err) {
-                console.warn('Cek sesi Supabase terlewati:', err);
-            }
-        }
-
-        function updateUserUI(user) {
-            currentUser = user;
-            if (user) {
-                authBtnText.textContent = user.email ? user.email.split('@')[0] : 'Profil';
-                profileEmail.textContent = user.email;
+        // AUTH HANDLERS
+        function updateUserUI() {
+            if (currentUserSession && currentUserSession.user) {
+                const email = currentUserSession.user.email;
+                authBtnText.textContent = email ? email.split('@')[0] : 'Profil';
+                profileEmail.textContent = email;
                 userProfileView.classList.remove('hidden');
                 authFormView.classList.add('hidden');
             } else {
@@ -440,13 +449,8 @@
             }
         }
 
-        function openAuthModal() { 
-            authModal.classList.remove('hidden'); 
-        }
-        
-        function closeAuthModal() { 
-            authModal.classList.add('hidden'); 
-        }
+        function openAuthModal() { authModal.classList.remove('hidden'); }
+        function closeAuthModal() { authModal.classList.add('hidden'); }
 
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
@@ -465,8 +469,6 @@
 
         async function handleAuthSubmit(e) {
             e.preventDefault();
-            if (!supabase) supabase = initSupabase();
-            if (!supabase) return alert('Sistem database belum siap. Mohon pastikan koneksi terhubung.');
 
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value.trim();
@@ -476,47 +478,38 @@
 
             try {
                 if (isSignUpMode) {
-                    const { error } = await supabase.auth.signUp({ email, password });
-                    if (error) alert('Gagal Daftar: ' + error.message);
-                    else {
-                        alert('Pendaftaran berhasil! Cek inbox/spam email Anda untuk konfirmasi akun.');
-                        toggleAuthMode();
-                    }
+                    const result = await SupabaseApi.signUp(email, password);
+                    alert('Pendaftaran berhasil! Silakan periksa email/inbox Anda untuk mengonfirmasi pendaftaran.');
+                    toggleAuthMode();
                 } else {
-                    const { error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) alert('Gagal Masuk: ' + error.message);
-                    else {
-                        closeAuthModal();
-                        checkBookmark();
-                    }
+                    const result = await SupabaseApi.signIn(email, password);
+                    currentUserSession = {
+                        access_token: result.access_token,
+                        user: result.user
+                    };
+                    localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
+                    updateUserUI();
+                    closeAuthModal();
+                    checkBookmark();
+                    alert('Berhasil Masuk!');
                 }
             } catch (err) {
-                alert('Error: ' + err.message);
+                alert('Gagal: ' + err.message);
             } finally {
                 btnSubmitAuth.disabled = false;
                 btnSubmitAuth.textContent = isSignUpMode ? 'Daftar' : 'Masuk';
             }
         }
 
-        async function handleGoogleLogin() {
-            if (!supabase) supabase = initSupabase();
-            if (!supabase) return alert('Gagal menghubungkan ke Supabase.');
-
-            const { error } = await supabase.auth.signInWithOAuth({ 
-                provider: 'google',
-                options: { redirectTo: window.location.href }
-            });
-            if (error) alert('Gagal Login Google: ' + error.message);
-        }
-
-        async function handleSignOut() {
-            if (!supabase) return;
-            await supabase.auth.signOut();
+        function handleSignOut() {
+            currentUserSession = null;
+            localStorage.removeItem('supabase_user_session');
+            updateUserUI();
             closeAuthModal();
-            alert('Berhasil Logout.');
+            alert('Berhasil Keluar.');
         }
 
-        // QURAN ENGINE HANDLERS
+        // QURAN ENGINE
         function restoreSettingsUI() {
             langSelect.value = selectedLang;
             qoriSelect.value = selectedQori;
@@ -864,15 +857,15 @@
             const data = { surahNo, surahName, ayatNo };
             localStorage.setItem('quran_premium_bookmark', JSON.stringify(data));
 
-            if (currentUser && supabase) {
+            if (currentUserSession && currentUserSession.access_token) {
                 try {
-                    await supabase.from('bookmarks').upsert({
-                        user_id: currentUser.id,
-                        surah_no: surahNo,
-                        surah_name: surahName,
-                        ayat_no: ayatNo,
-                        updated_at: new Date()
-                    });
+                    await SupabaseApi.upsertBookmark(
+                        currentUserSession.access_token,
+                        currentUserSession.user.id,
+                        surahNo,
+                        surahName,
+                        ayatNo
+                    );
                 } catch (e) { console.warn('Bookmark sync error:', e); }
             }
 
@@ -880,24 +873,10 @@
             alert(`Tersimpan: Surah ${surahName} ayat ${ayatNo}`);
         }
 
-        async function checkBookmark() {
-            let bookmarkData = null;
-
-            if (currentUser && supabase) {
-                try {
-                    const { data } = await supabase.from('bookmarks').select('*').eq('user_id', currentUser.id).single();
-                    if (data) {
-                        bookmarkData = { surahNo: data.surah_no, surahName: data.surah_name, ayatNo: data.ayat_no };
-                    }
-                } catch (e) {}
-            }
-
-            if (!bookmarkData) {
-                const saved = localStorage.getItem('quran_premium_bookmark');
-                if (saved) bookmarkData = JSON.parse(saved);
-            }
-
-            if (bookmarkData) {
+        function checkBookmark() {
+            const saved = localStorage.getItem('quran_premium_bookmark');
+            if (saved) {
+                const bookmarkData = JSON.parse(saved);
                 lastReadSurah.textContent = bookmarkData.surahName;
                 lastReadAyat.textContent = `Ayat ${bookmarkData.ayatNo}`;
                 lastReadWidget.classList.remove('hidden');
