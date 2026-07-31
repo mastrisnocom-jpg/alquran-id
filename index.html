@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al-Qur'anul Karim — Modern Super App</title>
-
+    
     <!-- META OPEN GRAPH UNTUK FACEBOOK, WHATSAPP, & TWITTER -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://alquranid.my.id/">
@@ -68,15 +68,6 @@
             box-shadow: 0 0 22px rgba(16, 185, 129, 0.22);
             transform: scale(1.01);
             transition: all 0.3s ease-in-out;
-        }
-
-        /* STYLING TOGGLE SWITCH MINIMALIS */
-        .toggle-checkbox:checked {
-            right: 0;
-            background-color: #10b981;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #10b981;
         }
     </style>
 </head>
@@ -257,16 +248,16 @@
                 💛 Dukung via Saweria
             </a>
             <span>•</span>
-            <a href="/privacy.html" class="hover:text-emerald-500 transition">Kebijakan Privasi</a>
+            <a href="/privacy" class="hover:text-emerald-500 transition">Kebijakan Privasi</a>
             <span>•</span>
-            <a href="/contact.html" class="hover:text-emerald-500 transition">Kontak Kami</a>
+            <a href="/contact" class="hover:text-emerald-500 transition">Kontak Kami</a>
             <span>•</span>
-            <a href="/iqro.html" class="hover:text-emerald-500 transition">Buku Iqro</a>
+            <a href="/iqro" class="hover:text-emerald-500 transition">Buku Iqro</a>
         </div>
         <p>© 2026 Al-Qur'anul Karim Digital. Semua Hak Dilindungi.</p>
     </footer>
 
-    <!-- MODAL AUTHENTICATION & PENGATURAN MODEL BARU (SESUAI GAMBAR) -->
+    <!-- MODAL AUTHENTICATION & PENGATURAN -->
     <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
@@ -314,25 +305,22 @@
                 </button>
             </div>
 
-            <!-- TAMPILAN PENGATURAN MODERN PERSIS SEPERTI DI GAMBAR RUJUKAN -->
+            <!-- PENGATURAN MODEL MODERN -->
             <div class="pt-4 space-y-4 text-xs font-medium">
                 
-                <!-- 1. Ukuran Font Slider -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Ukuran Font</span>
                     <input type="range" id="fontSizeSlider" min="12" max="26" value="14" class="w-28 accent-blue-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg">
                 </div>
 
-                <!-- 2. Quran Tajweed Toggle Switch -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Quran Tajweed</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleTajweedSwitch" class="sr-only peer" checked>
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div class="w-11 h-6 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
 
-                <!-- 3. Quran Isyarat Toggle Switch -->
                 <div class="flex items-center justify-between opacity-50">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Quran Isyarat</span>
                     <label class="relative inline-flex items-center cursor-not-allowed">
@@ -341,34 +329,30 @@
                     </label>
                 </div>
 
-                <!-- 4. Transliterasi (Latin) Toggle Switch -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Transliterasi (Latin)</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleLatinSwitch" class="sr-only peer" checked>
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div class="w-11 h-6 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
 
-                <!-- 5. Terjemahan Bahasa Toggle Switch -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Terjemahan Bahasa</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleTransSwitch" class="sr-only peer" checked>
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div class="w-11 h-6 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
 
-                <!-- 6. Dark Mode Toggle Switch -->
                 <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
                     <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Mode Gelap (Dark)</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="toggleDarkModeSwitch" class="sr-only peer" onchange="toggleTheme()" checked>
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <div class="w-11 h-6 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                     </label>
                 </div>
 
-                <!-- 7. Pilih Bahasa Terjemah Badge Chips -->
                 <div class="pt-2 space-y-2">
                     <label class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Pilih Bahasa Terjemah</label>
                     <div class="flex items-center gap-2 overflow-x-auto pb-2" id="langChipContainer">
@@ -571,7 +555,7 @@
 
         function getUserLocation() {
             const userLocText = document.getElementById('userLocationText');
-            userLocText.textContent = 'Mndeteksi koordinat...';
+            userLocText.textContent = 'Mendeteksi koordinat...';
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -825,8 +809,8 @@
             currentSurahNo = surahNo;
             localStorage.setItem('quran_last_opened_surah', surahNo);
             
-            if (!window.location.hash.includes('access_token')) {
-                window.location.hash = `surah-${surahNo}`;
+            if (window.location.pathname !== `/surah/${surahNo}`) {
+                history.pushState({ surahNo: surahNo }, '', `/surah/${surahNo}`);
             }
 
             placeholderView.classList.add('hidden');
@@ -883,16 +867,24 @@
         }
 
         async function restoreSessionState() {
-            let lastSurah = localStorage.getItem('quran_last_opened_surah');
-            if (window.location.hash.startsWith('#surah-')) {
-                lastSurah = window.location.hash.replace('#surah-', '');
+            const path = window.location.pathname;
+            if (path.startsWith('/surah/')) {
+                const surahNoFromUrl = path.split('/surah/')[1];
+                if (surahNoFromUrl && !isNaN(surahNoFromUrl)) {
+                    await loadSurah(parseInt(surahNoFromUrl));
+                    return;
+                }
             }
+
+            let lastSurah = localStorage.getItem('quran_last_opened_surah');
             if (lastSurah) { await loadSurah(parseInt(lastSurah)); }
         }
 
+        window.addEventListener('popstate', (event) => { restoreSessionState(); });
+
         function resetToHome() {
             localStorage.removeItem('quran_last_opened_surah');
-            window.location.hash = '';
+            history.pushState({}, '', '/');
             window.location.reload();
         }
 
@@ -1044,7 +1036,7 @@
         }
 
         function shareAyat(surahName, ayatNo, textArab, textTrans) {
-            const directUrl = `${window.location.origin}${window.location.pathname}#surah-${currentSurahNo}`;
+            const directUrl = `${window.location.origin}/surah/${currentSurahNo}`;
             
             const shareText = `*Al-Qur'an - ${surahName} Ayat ${ayatNo}*\n\n"${textArab}"\n\n*Artinya:*\n"${textTrans}"\n\n📖 *Baca, dengarkan murottal merdu, dan pelajari tajwid berwarna lengkap di sini:*\n${directUrl}`;
 
