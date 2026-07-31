@@ -18,6 +18,10 @@
             }
         }
     </script>
+
+    <!-- SUPABASE JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Scheherazade+New:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- CSS TEMA TAJWID BERWARNA -->
@@ -28,15 +32,14 @@
         /* Pewarnaan Hukum Tajwid */
         tajweed[class*="ham_wasl"] { color: #AAAAAA; }
         tajweed[class*="slnt"] { color: #AAAAAA; }
-        tajweed[class*="mdda"] { color: #FF0000; font-weight: bold; } /* Mad Wajib/Jaiz */
+        tajweed[class*="mdda"] { color: #FF0000; font-weight: bold; } /* Mad */
         tajweed[class*="ghn"] { color: #FF7E00; font-weight: bold; }  /* Ghunnah */
         tajweed[class*="ikhf"] { color: #9400D3; }                   /* Ikhfa */
         tajweed[class*="idgh"] { color: #1E90FF; }                   /* Idgham */
         tajweed[class*="iqlb"] { color: #2E8B57; }                   /* Iqlab */
         tajweed[class*="qlq"] { color: #DD0000; font-weight: bold; } /* Qalqalah */
         
-        /* Panduan Tajwid Badge */
-        .legend-item { display: inline-flex; items-center: center; gap: 4px; font-size: 11px; margin-right: 8px; }
+        .legend-item { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; margin-right: 8px; }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
@@ -55,14 +58,17 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Tombol Cari -->
                 <button type="button" id="btnSearchToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
+                <!-- Container Auth (Dinamis: Berubah Jadi "Keluar" Saat Login) -->
                 <div id="authButtonContainer">
-                    <button type="button" id="btnAuthToggle" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button type="button" id="btnAuthToggle" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
 
+                <!-- Tombol Dark Mode -->
                 <button type="button" id="btnDarkToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">
                     <span id="themeIcon">☀️</span>
                 </button>
@@ -173,8 +179,129 @@
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT MASTER -->
+    <!-- SCRIPT JAVASCRIPT LOGIC -->
     <script>
+        // 1. SUPABASE CONFIGURATION
+        const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc';
+
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.warn("Supabase SDK belum dimuat:", e);
+        }
+
+        // State Global User
+        let currentUser = null;
+
+        // 2. FUNGSI UPDATE UI DENGAN LOGIKA MASUK / KELUAR
+        function renderUserAuthUI(user) {
+            currentUser = user;
+            const container = document.getElementById('authButtonContainer');
+
+            if (user) {
+                // Tampilan Ketika Sudah Login -> Tombol "Keluar"
+                const userEmailShort = user.email ? user.email.split('@')[0] : 'User';
+                container.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 pl-2.5 rounded-full border border-slate-200 dark:border-slate-700">
+                        <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 max-w-[80px] sm:max-w-[120px] truncate">
+                            👤 ${userEmailShort}
+                        </span>
+                        <button type="button" onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold text-[11px] transition shadow-sm">
+                            Keluar
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Tampilan Ketika Belum Login -> Tombol "Masuk"
+                container.innerHTML = `
+                    <button type="button" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                        Masuk
+                    </button>
+                `;
+            }
+        }
+
+        // Cek Sesi Supabase / Local Storage
+        async function checkSession() {
+            if (supabase) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    renderUserAuthUI(session.user);
+                } else {
+                    renderUserAuthUI(null);
+                }
+
+                supabase.auth.onAuthStateChange((_event, session) => {
+                    renderUserAuthUI(session ? session.user : null);
+                });
+            } else {
+                // Fallback Local Storage
+                const savedUser = localStorage.getItem('local_quran_user');
+                if (savedUser) {
+                    renderUserAuthUI(JSON.parse(savedUser));
+                } else {
+                    renderUserAuthUI(null);
+                }
+            }
+        }
+
+        // Submit Form Login / Register
+        document.getElementById('authForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const msgEl = document.getElementById('authMsg');
+            const btnSubmit = document.getElementById('btnAuthSubmit');
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Memproses...";
+            msgEl.classList.add('hidden');
+
+            try {
+                if (supabase) {
+                    if (isRegisterMode) {
+                        const { error } = await supabase.auth.signUp({ email, password });
+                        if (error) throw error;
+                        alert("Pendaftaran berhasil! Silakan langsung login.");
+                        toggleAuthMode();
+                    } else {
+                        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+                        if (error) throw error;
+                        closeAuthModal();
+                    }
+                } else {
+                    // Simpan sesi dummy jika tanpa Supabase
+                    const userObj = { email: email };
+                    localStorage.setItem('local_quran_user', JSON.stringify(userObj));
+                    renderUserAuthUI(userObj);
+                    closeAuthModal();
+                }
+            } catch (err) {
+                msgEl.textContent = err.message || "Gagal masuk, periksa email & password.";
+                msgEl.className = "p-2.5 rounded-xl text-xs font-medium text-center mb-3 bg-red-500/10 text-red-500 border border-red-500/20";
+                msgEl.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            }
+        };
+
+        // Fungsi Logout
+        window.handleLogout = async function() {
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                if (supabase) {
+                    await supabase.auth.signOut();
+                }
+                localStorage.removeItem('local_quran_user');
+                renderUserAuthUI(null);
+            }
+        };
+
+        // 3. UI MODALS & CONTROLS
         const searchModal = document.getElementById('searchModal');
         const authModal = document.getElementById('authModal');
         const searchInput = document.getElementById('searchInput');
@@ -184,20 +311,7 @@
             document.getElementById('themeIcon').textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
         };
 
-        function showSearch() {
-            searchModal.classList.remove('hidden');
-            if (window.allSurahs) renderSurahSearchList(window.allSurahs);
-            setTimeout(() => searchInput.focus(), 100);
-        }
-
-        document.getElementById('btnSearchToggle').onclick = showSearch;
-        document.getElementById('btnSearchPlaceholder').onclick = showSearch;
-        document.getElementById('btnCloseSearch').onclick = function() {
-            searchModal.classList.add('hidden');
-            searchInput.value = '';
-        };
-
-        document.getElementById('btnAuthToggle').onclick = function() {
+        window.openAuthModal = function() {
             document.getElementById('authMsg').classList.add('hidden');
             authModal.classList.remove('hidden');
         };
@@ -216,6 +330,20 @@
             document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
         };
 
+        function showSearch() {
+            searchModal.classList.remove('hidden');
+            if (window.allSurahs) renderSurahSearchList(window.allSurahs);
+            setTimeout(() => searchInput.focus(), 100);
+        }
+
+        document.getElementById('btnSearchToggle').onclick = showSearch;
+        document.getElementById('btnSearchPlaceholder').onclick = showSearch;
+        document.getElementById('btnCloseSearch').onclick = function() {
+            searchModal.classList.add('hidden');
+            searchInput.value = '';
+        };
+
+        // 4. API & SURAH RENDER
         window.allSurahs = [];
         let currentSurahNo = null;
         let selectedLang = 'id.indonesian';
@@ -230,7 +358,6 @@
                 console.error("Gagal API Surah:", err);
             }
         }
-        fetchSurahs();
 
         searchInput.oninput = function(e) {
             const val = e.target.value.toLowerCase().trim();
@@ -270,7 +397,6 @@
             document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // FUNGSI UTAMA LOAD SURAH + TAJWID BERWARNA
         async function loadSurah(surahNo) {
             currentSurahNo = surahNo;
             document.getElementById('placeholderView').classList.add('hidden');
@@ -279,7 +405,6 @@
             ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat teks tajwid, audio, dan terjemahan...</div>`;
 
             try {
-                // Mengambil Teks Arab versi Tajwid (quran-tajweed)
                 const [arabicRes, transRes, audioRes] = await Promise.all([
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/quran-tajweed`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${selectedLang}`),
@@ -325,7 +450,6 @@
                         </div>
                     </div>
                     
-                    <!-- TEKS ARAB DENGAN HIGHLIGHT TAJWID BERWARNA -->
                     <div class="text-right font-arabic text-2xl sm:text-3xl mb-4 text-slate-800 dark:text-slate-100 tracking-wide">
                         ${a.textArabTajweed}
                     </div>
@@ -359,6 +483,10 @@
                 alert('Teks disalin!');
             }
         };
+
+        // Init Aplikasi
+        fetchSurahs();
+        checkSession();
     </script>
 </body>
 </html>
