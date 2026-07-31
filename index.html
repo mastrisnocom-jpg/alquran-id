@@ -51,15 +51,15 @@
             border-radius: 10px;
         }
 
-        /* STYLING WARNA TAJWID */
-        tajweed[class*="ghunnah"], .tajweed-ghunnah { color: #ff7e00 !important; font-weight: bold; }
-        tajweed[class*="ikhfa"], .tajweed-ikhfa { color: #9400d3 !important; font-weight: bold; }
-        tajweed[class*="idgham"], .tajweed-idgham { color: #1e90ff !important; font-weight: bold; }
-        tajweed[class*="qlq"], tajweed[class*="qalqalah"], .tajweed-qalqalah { color: #dd2c00 !important; font-weight: bold; }
-        tajweed[class*="iqlab"], .tajweed-iqlab { color: #008000 !important; font-weight: bold; }
-        tajweed[class*="mad"], .tajweed-mad { color: #e91e63 !important; }
-        tajweed[class*="ham_wasl"] { color: #888888 !important; }
-        tajweed[class*="slnt"], tajweed[class*="silent"] { color: #aaaaaa !important; }
+        /* CLASS WARNA TAJWID RESPONSIF */
+        .tj-ghunnah { color: #ff7e00 !important; font-weight: bold; }
+        .tj-ikhfa { color: #9400d3 !important; font-weight: bold; }
+        .tj-idgham { color: #1e90ff !important; font-weight: bold; }
+        .tj-qalqalah { color: #dd2c00 !important; font-weight: bold; }
+        .tj-iqlab { color: #008000 !important; font-weight: bold; }
+        .tj-mad { color: #e91e63 !important; }
+        .tj-hamwasl { color: #888888 !important; }
+        .tj-silent { color: #aaaaaa !important; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
@@ -176,12 +176,12 @@
                 </select>
             </div>
 
-            <!-- OPSI BARU: TAJWID BERWARNA -->
+            <!-- TAJWID BERWARNA -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🎨 Tajwid:</span>
                 <select id="tajweedSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
                     <option value="true" class="dark:bg-darkCard">🌈 Berwarna</option>
-                    <option value="false" class="dark:bg-darkCard">⚫ Polos (Hitam/Putih)</option>
+                    <option value="false" class="dark:bg-darkCard">⚫ Polos</option>
                 </select>
             </div>
 
@@ -696,6 +696,31 @@
             return arabicPattern.test(text);
         }
 
+        // FUNGSI PARSER KODE TAJWID BRAKETS DARI API
+        function parseTajweedCode(text) {
+            if (!text) return '';
+            
+            // Map Aturan Tajwid
+            let parsed = text;
+            parsed = parsed.replace(/\[h:[0-9]+\[/g, '<span class="tj-hamwasl">');
+            parsed = parsed.replace(/\[s\[/g, '<span class="tj-silent">');
+            parsed = parsed.replace(/\[l\[/g, '<span class="tj-slnt">');
+            parsed = parsed.replace(/\[n\[/g, '<span class="tj-ghunnah">');
+            parsed = parsed.replace(/\[m\[/g, '<span class="tj-idgham">');
+            parsed = parsed.replace(/\[p\[/g, '<span class="tj-iqlab">');
+            parsed = parsed.replace(/\[f\[/g, '<span class="tj-ikhfa">');
+            parsed = parsed.replace(/\[q\[/g, '<span class="tj-qalqalah">');
+            parsed = parsed.replace(/\[o\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[c\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[w\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[i\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[a\[/g, '<span class="tj-mad">');
+
+            // Tutup Tag
+            parsed = parsed.replace(/\]/g, '</span>');
+            return parsed;
+        }
+
         async function loadSurah(surahNo) {
             stopAudio();
             currentSurahNo = surahNo;
@@ -711,7 +736,6 @@
             ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat ayat, tajwid, latin, dan audio...</div>`;
 
             try {
-                // Pilih edition Arab standar atau quran-tajweed berdasarkan pilihan
                 const arabEdition = isTajweedEnabled ? 'quran-tajweed' : 'quran-uthmani';
 
                 const [arabicRes, latinPrimaryRes, latinBackupRes, transRes, audioRes] = await Promise.all([
@@ -741,9 +765,15 @@
                         if (containsArabic(latinText)) latinText = '';
                     }
 
+                    // Render Tajwid secara visual jika Tajwid Diaktifkan
+                    let formattedArab = ayah.text;
+                    if (isTajweedEnabled) {
+                        formattedArab = parseTajweedCode(ayah.text);
+                    }
+
                     return {
                         numberInSurah: ayah.numberInSurah,
-                        textArab: ayah.text,
+                        textArab: formattedArab,
                         textLatin: latinText,
                         textTrans: transData.data && transData.data.ayahs[index] ? transData.data.ayahs[index].text : '',
                         audioUrl: audioData.data && audioData.data.ayahs[index] ? audioData.data.ayahs[index].audio : ''
