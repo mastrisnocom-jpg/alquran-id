@@ -339,7 +339,7 @@
     <script>
         // CONFIG SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
-        const SUPABASE_ANON_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy'; 
 
         // REST API DIRECT SUPABASE FETCH ENGINE
         const SupabaseApi = {
@@ -445,10 +445,13 @@
             initTheme();
             restoreSettingsUI();
             
-            // PROSES OAUTH TANGKAP TOKEN GOOGLE PERTAMA KALI
+            // 1. TANGKAP TOKEN OAUTH GOOGLE TERLEBIH DAHULU SEBELUM NAVIGASI SURAH
             await checkOAuthCallback();
             
+            // 2. UPDATE UI PROFIL
             updateUserUI();
+
+            // 3. LOAD DATA QURAN
             await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
@@ -464,7 +467,9 @@
         async function checkOAuthCallback() {
             const hash = window.location.hash;
             if (hash && hash.includes('access_token=')) {
-                const params = new URLSearchParams(hash.replace('#', '?'));
+                // Parse parameter access_token dari URL hash
+                const rawParams = hash.replace('#', '?');
+                const params = new URLSearchParams(rawParams);
                 const accessToken = params.get('access_token');
                 
                 if (accessToken) {
@@ -481,7 +486,7 @@
                             currentUserSession = { access_token: accessToken, user: user };
                             localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
                             
-                            // Bersihkan URL Hash agar tidak mengganggu navigasi surah
+                            // Bersihkan URL hash OAuth agar tidak merusak navigasi surah
                             history.replaceState(null, null, window.location.pathname);
                         }
                     } catch (err) {
@@ -494,8 +499,11 @@
         // AUTH HANDLERS
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
-                const email = currentUserSession.user.email || 'Pengguna Google';
-                authBtnText.textContent = email.split('@')[0];
+                const userObj = currentUserSession.user;
+                // Ambil email dari akun atau dari user_metadata (khusus akun Google)
+                const email = userObj.email || (userObj.user_metadata ? userObj.user_metadata.email : '') || 'Pengguna Google';
+                
+                authBtnText.textContent = email.includes('@') ? email.split('@')[0] : 'Profil';
                 profileEmail.textContent = email;
                 userProfileView.classList.remove('hidden');
                 authFormView.classList.add('hidden');
@@ -663,7 +671,7 @@
             
             localStorage.setItem('quran_last_opened_surah', surahNo);
             
-            // Tetapkan URL hash hanya jika tidak sedang memproses callback token login
+            // Atur Hash Surah hanya jika tidak ada token Google yang sedang aktif dibaca
             if (!window.location.hash.includes('access_token')) {
                 window.location.hash = `surah-${surahNo}`;
             }
