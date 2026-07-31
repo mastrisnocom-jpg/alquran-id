@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Qur'anul Karim — Pure Digital App</title>
+    <title>Al-Qur'anul Karim — Digital App</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -132,8 +132,8 @@
         </section>
     </main>
 
-    <!-- MODAL SEARCH -->
-    <div id="searchModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-16 px-4 hidden">
+    <!-- MODAL SEARCH (POP-UP PENCARIAN) -->
+    <div id="searchModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 px-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
                 <input type="text" id="searchInput" oninput="handleSearchInput(this.value)" placeholder="Ketik nama/nomor surah (misal: Yasin, 36)..." class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:outline-none text-xs dark:text-white">
@@ -143,8 +143,8 @@
         </div>
     </div>
 
-    <!-- MODAL LOGIN / REGISTER -->
-    <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <!-- MODAL LOGIN / REGISTER (POP-UP MASUK) -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="authModalTitle" class="text-base font-bold text-emerald-600 dark:text-emerald-400">Masuk ke Akun</h3>
@@ -179,7 +179,7 @@
 
     <!-- JavaScript Master Logic -->
     <script>
-        // 1. SUPABASE CONFIGURATION
+        // 1. SUPABASE SAFE INITIALIZATION
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc';
 
@@ -192,7 +192,7 @@
             console.warn("Supabase SDK gagal dimuat:", e);
         }
 
-        // Global State
+        // Global States
         let currentUser = null;
         let isRegisterMode = false;
         let allSurahs = [];
@@ -200,26 +200,32 @@
         let selectedLang = 'id.indonesian';
         let selectedQori = 'ar.alafasy';
 
-        // DOM Loaded Init
+        // Event Listener On Load
         document.addEventListener('DOMContentLoaded', () => {
             fetchSurahs();
             if (supabase) initSupabaseSession();
         });
 
-        // 2. DARK MODE HANDLER (LANGSUNG BEKERJA)
-        window.toggleDarkMode = function() {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('themeIcon');
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                themeIcon.textContent = '🌙';
-            } else {
-                html.classList.add('dark');
-                themeIcon.textContent = '☀️';
-            }
+        // 2. FUNGSI POP-UP (MODAL MASUK) — DIJAMIN AKTIF
+        window.openAuthModal = function() {
+            document.getElementById('authMsg').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('hidden');
         };
 
-        // 3. SEARCH MODAL HANDLER
+        window.closeAuthModal = function() {
+            document.getElementById('authModal').classList.add('hidden');
+        };
+
+        window.toggleAuthMode = function() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('authMsg').classList.add('hidden');
+            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
+            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
+            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
+        };
+
+        // 3. FUNGSI POP-UP (MODAL PENCARIAN) — DIJAMIN AKTIF
         window.openSearchModal = function() {
             document.getElementById('searchModal').classList.remove('hidden');
             renderSurahSearchList(allSurahs);
@@ -243,26 +249,20 @@
             renderSurahSearchList(filtered);
         };
 
-        // 4. AUTH MODAL HANDLER
-        window.openAuthModal = function() {
-            document.getElementById('authMsg').classList.add('hidden');
-            document.getElementById('authModal').classList.remove('hidden');
+        // 4. DARK MODE — DIJAMIN AKTIF
+        window.toggleDarkMode = function() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                themeIcon.textContent = '🌙';
+            } else {
+                html.classList.add('dark');
+                themeIcon.textContent = '☀️';
+            }
         };
 
-        window.closeAuthModal = function() {
-            document.getElementById('authModal').classList.add('hidden');
-        };
-
-        window.toggleAuthMode = function() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('authMsg').classList.add('hidden');
-            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
-            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
-            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
-            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
-        };
-
-        // 5. DATA API & SURAH LOAD
+        // 5. FETCH & MEMUAT SURAH
         async function fetchSurahs() {
             try {
                 const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -392,7 +392,7 @@
                     updateUserUI(session ? session.user : null);
                 });
             } catch (e) {
-                console.warn("Session Supabase tidak dapat diinisialisasi:", e);
+                console.warn("Autentikasi Supabase tidak tersedia:", e);
             }
         }
 
@@ -425,7 +425,7 @@
             msgEl.classList.add('hidden');
 
             if (!supabase) {
-                showAuthMsg("Supabase Client belum dikonfigurasi.", true);
+                showAuthMsg("Supabase Client belum terhubung.", true);
                 return;
             }
 
@@ -466,7 +466,7 @@
         window.handleLogout = async function() {
             if (supabase) {
                 await supabase.auth.signOut();
-                alert('Anda telah keluar akun.');
+                alert('Anda telah keluar.');
             }
         };
 
@@ -484,7 +484,7 @@
                 ]);
 
                 if (error) throw error;
-                alert(`Tersimpan di Cloud: ${surahName} ayat ${ayatNo}`);
+                alert(`Tersimpan: ${surahName} ayat ${ayatNo}`);
                 loadBookmarkFromSupabase();
             } catch (err) {
                 alert('Gagal menyimpan bookmark: ' + err.message);
