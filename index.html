@@ -60,7 +60,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
 
-    <!-- 1. HEADER / NAVBAR (Cuma Foto Profil Google) -->
+    <!-- 1. HEADER / NAVBAR (MINIMALIS & CLEAN) -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
@@ -76,22 +76,12 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Tombol Filter Pengaturan Modal -->
-                <button onclick="openSettingsModal()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm" title="Pengaturan">
-                    ⚙️
-                </button>
-
                 <!-- Tombol Cari -->
                 <button id="btnOpenSearch" onclick="openSearchModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     🔍
                 </button>
 
-                <!-- Tombol Mode Gelap -->
-                <button id="themeToggle" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
-                    <span id="themeIcon">☀️</span>
-                </button>
-
-                <!-- Photo Avatar Only (Tanpa Teks) -->
+                <!-- Photo Avatar Only (Klik Untuk Buka Profil & Pengaturan) -->
                 <button id="btnAuth" onclick="openAuthModal()" class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:ring-2 hover:ring-emerald-500 transition shadow-sm overflow-hidden p-0.5">
                     <span id="authBtnIcon" class="w-full h-full rounded-xl overflow-hidden flex items-center justify-center text-lg">👤</span>
                 </button>
@@ -118,7 +108,7 @@
             </div>
         </div>
 
-        <!-- MENU NAVIGATION ICONS MOBILE COMPACT (RINGKAS & BERSIH) -->
+        <!-- MENU NAVIGATION ICONS MOBILE COMPACT -->
         <div class="bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
             <div class="grid grid-cols-5 gap-2 text-center">
                 <button onclick="openSearchModal()" class="flex flex-col items-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
@@ -148,7 +138,7 @@
             </div>
         </div>
 
-        <!-- PANDUAN WARNA TAJWID (COMPACT) -->
+        <!-- PANDUAN WARNA TAJWID -->
         <div id="tajweedLegend" class="bg-white dark:bg-darkCard p-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-[10px] flex flex-wrap items-center justify-around gap-2 font-medium">
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Ikhfa</span>
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Idgham</span>
@@ -201,19 +191,67 @@
 
     </main>
 
-    <!-- MODAL POPUP PENGATURAN (ELEGAN & PROFESIONAL) -->
-    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-darkCard w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative">
-            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
+    <!-- MODAL AUTHENTICATION & PENGATURAN APLIKASI (DISATUKAN DENGAN ELEGAN) -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
 
-            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span>⚙️</span> Pengaturan Quran
-            </h3>
+            <!-- User Info View (Jika Sudah Login) -->
+            <div id="userProfileView" class="hidden text-center space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div id="userAvatarContainer" class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold overflow-hidden shadow-md">👤</div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100" id="profileEmail">user@email.com</h3>
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20">Akun Terverifikasi</span>
+                </div>
+                <button onclick="handleSignOut()" class="py-1.5 px-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs rounded-xl transition">
+                    Keluar / Logout
+                </button>
+            </div>
 
-            <div class="space-y-4 text-xs">
+            <!-- Form Auth View (Jika Belum Login) -->
+            <div id="authFormView" class="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="text-center">
+                    <h3 id="authTitle" class="text-base font-bold text-slate-900 dark:text-slate-100">Masuk ke Akun</h3>
+                    <p id="authSubtitle" class="text-[11px] text-slate-400 mt-0.5">Simpan bookmark dan surah favorit ke cloud.</p>
+                </div>
+
+                <button onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Lanjutkan dengan Google</span>
+                </button>
+            </div>
+
+            <!-- SECTION PENGATURAN INTEGRASI DENGAN DARK MODE -->
+            <div class="pt-4 space-y-3 text-xs">
+                <h4 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span>⚙️</span> Pengaturan Aplikasi
+                </h4>
+
+                <!-- Dark Mode Toggle Row -->
+                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300">🌙 Mode Gelap (Dark Mode)</span>
+                    <button id="themeToggleBtn" onclick="toggleTheme()" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl border border-emerald-500/20">
+                        <span id="themeToggleText">Aktif</span>
+                    </button>
+                </div>
+
+                <!-- Slider Ukuran Teks Terjemahan -->
+                <div class="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1.5">
+                    <div class="flex justify-between font-semibold text-slate-700 dark:text-slate-300">
+                        <span>🔍 Ukuran Teks Terjemah</span>
+                        <span id="fontSizeVal" class="text-emerald-600 dark:text-emerald-400 font-bold">14px</span>
+                    </div>
+                    <input type="range" id="fontSizeSlider" min="12" max="22" value="14" class="w-full accent-emerald-500 cursor-pointer">
+                </div>
+
                 <div>
                     <label class="block font-semibold text-slate-500 mb-1">🌐 Bahasa Terjemahan</label>
-                    <select id="langSelect" class="w-full px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium focus:outline-none">
+                    <select id="langSelect" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium focus:outline-none">
                         <option value="id.indonesian">🇮🇩 Indonesia</option>
                         <option value="en.sahih">🇬🇧 English</option>
                         <option value="fr.hamidullah">🇫🇷 Français</option>
@@ -226,7 +264,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-500 mb-1">🎙️ Qori / Suara Audio</label>
-                    <select id="qoriSelect" class="w-full px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium focus:outline-none">
+                    <select id="qoriSelect" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium focus:outline-none">
                         <option value="ar.alafasy">Mishary Rashid Alafasy</option>
                         <option value="ar.abdurrahmaanasassudais">Abdurrahman As-Sudais</option>
                         <option value="ar.hudhaify">Ali Al-Hudhaify</option>
@@ -236,7 +274,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-500 mb-1">🎨 Tampilan Tajwid</label>
-                    <select id="tajweedSelect" class="w-full px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none">
+                    <select id="tajweedSelect" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none">
                         <option value="true">🌈 Berwarna</option>
                         <option value="false">⚫ Polos</option>
                     </select>
@@ -244,74 +282,16 @@
 
                 <div>
                     <label class="block font-semibold text-slate-500 mb-1">🎧 Mode Putar Audio</label>
-                    <select id="audioModeSelect" class="w-full px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold focus:outline-none">
+                    <select id="audioModeSelect" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold focus:outline-none">
                         <option value="surah">⏩ Berurutan (1 Surah)</option>
                         <option value="single">🔂 Berhenti Per-Ayat</option>
                     </select>
                 </div>
             </div>
 
-            <button onclick="closeSettingsModal()" class="w-full mt-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition">
-                Simpan & Terapkan
+            <button onclick="closeAuthModal()" class="w-full mt-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition">
+                Simpan & Tutup
             </button>
-        </div>
-    </div>
-
-    <!-- MODAL AUTHENTICATION -->
-    <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold">✕</button>
-
-            <!-- Profile View -->
-            <div id="userProfileView" class="hidden text-center space-y-4 py-2">
-                <div id="userAvatarContainer" class="w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-3xl font-bold overflow-hidden shadow-md">👤</div>
-                <div>
-                    <h3 class="font-bold text-base text-slate-800 dark:text-slate-100" id="profileEmail">user@email.com</h3>
-                    <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20">Akun Terverifikasi</span>
-                </div>
-                <button onclick="handleSignOut()" class="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs rounded-xl transition">Keluar / Logout</button>
-            </div>
-
-            <!-- Form View -->
-            <div id="authFormView" class="space-y-4">
-                <div class="text-center">
-                    <h3 id="authTitle" class="text-lg font-bold text-slate-900 dark:text-slate-100">Masuk ke Akun</h3>
-                    <p id="authSubtitle" class="text-xs text-slate-400 mt-1">Simpan bookmark dan surah favorit ke cloud.</p>
-                </div>
-
-                <button onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    <span>Lanjutkan dengan Google</span>
-                </button>
-
-                <div class="flex items-center my-3">
-                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-                    <span class="px-3 text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Atau</span>
-                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-                </div>
-
-                <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Email</label>
-                        <input type="email" id="authEmail" required placeholder="nama@email.com" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-100">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Kata Sandi</label>
-                        <input type="password" id="authPassword" required minlength="6" placeholder="Minimal 6 karakter" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-100">
-                    </div>
-
-                    <button type="submit" id="btnSubmitAuth" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition">Masuk</button>
-                </form>
-
-                <div class="text-center pt-2">
-                    <button type="button" onclick="toggleAuthMode()" id="btnToggleAuthMode" class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">Belum punya akun? Daftar</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -397,6 +377,7 @@
         let selectedQori = localStorage.getItem('quran_qori') || 'ar.alafasy';
         let playMode = localStorage.getItem('quran_playmode') || 'surah';
         let isTajweedEnabled = localStorage.getItem('quran_tajweed') === 'false' ? false : true;
+        let currentFontSize = localStorage.getItem('quran_font_size') || '14';
 
         let globalAudio = new Audio();
         let currentPlayingIndex = -1;
@@ -412,7 +393,6 @@
         const authBtnIcon = document.getElementById('authBtnIcon');
         const profileEmail = document.getElementById('profileEmail');
 
-        const settingsModal = document.getElementById('settingsModal');
         const searchModal = document.getElementById('searchModal');
         const searchInput = document.getElementById('searchInput');
         const surahListEl = document.getElementById('surahList');
@@ -424,8 +404,8 @@
         const tajweedSelect = document.getElementById('tajweedSelect');
         const tajweedLegend = document.getElementById('tajweedLegend');
         const audioModeSelect = document.getElementById('audioModeSelect');
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const fontSizeVal = document.getElementById('fontSizeVal');
         
         const audioBar = document.getElementById('audioBar');
         const audioBarTitle = document.getElementById('audioBarTitle');
@@ -448,9 +428,6 @@
             setupAudioListeners();
             restoreSessionState();
         });
-
-        function openSettingsModal() { settingsModal.classList.remove('hidden'); }
-        function closeSettingsModal() { settingsModal.classList.add('hidden'); }
 
         function handleGoogleLogin() {
             const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
@@ -480,7 +457,6 @@
             }
         }
 
-        // AVATAR USER HEADER ONLY
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
                 const userObj = currentUserSession.user;
@@ -568,31 +544,46 @@
             qoriSelect.value = selectedQori;
             audioModeSelect.value = playMode;
             tajweedSelect.value = isTajweedEnabled.toString();
+            fontSizeSlider.value = currentFontSize;
+            fontSizeVal.textContent = `${currentFontSize}px`;
             
             if (isTajweedEnabled) { tajweedLegend.classList.remove('hidden'); } 
             else { tajweedLegend.classList.add('hidden'); }
         }
 
         function initTheme() {
+            const toggleText = document.getElementById('themeToggleText');
             if (localStorage.theme === 'light') {
                 document.documentElement.classList.remove('dark');
-                themeIcon.textContent = '🌙';
+                if(toggleText) toggleText.textContent = 'Nonaktif';
             } else {
                 document.documentElement.classList.add('dark');
-                themeIcon.textContent = '☀️';
+                if(toggleText) toggleText.textContent = 'Aktif';
             }
         }
 
-        themeToggle.addEventListener('click', () => {
+        function toggleTheme() {
+            const toggleText = document.getElementById('themeToggleText');
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
                 localStorage.theme = 'light';
-                themeIcon.textContent = '🌙';
+                if(toggleText) toggleText.textContent = 'Nonaktif';
             } else {
                 document.documentElement.classList.add('dark');
                 localStorage.theme = 'dark';
-                themeIcon.textContent = '☀️';
+                if(toggleText) toggleText.textContent = 'Aktif';
             }
+        }
+
+        fontSizeSlider.addEventListener('input', (e) => {
+            currentFontSize = e.target.value;
+            fontSizeVal.textContent = `${currentFontSize}px`;
+            localStorage.setItem('quran_font_size', currentFontSize);
+            
+            // Terapkan ukuran font terjemahan secara realtime
+            document.querySelectorAll('.trans-text').forEach(el => {
+                el.style.fontSize = `${currentFontSize}px`;
+            });
         });
 
         function openSearchModal() { searchModal.classList.remove('hidden'); setTimeout(() => searchInput.focus(), 100); }
@@ -761,22 +752,40 @@
             localStorage.setItem('quran_playmode', playMode);
         });
 
+        // RENDER AYAT (TOMBOL AUDIO DIPINDAH KE ATAS, TEKS "PUTAR AUDIO" DIHAPUS)
         function renderAyat(ayahs, surahName) {
             ayatContainer.innerHTML = ayahs.map((a, idx) => `
                 <div id="ayat-card-${idx}" class="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 transition-all duration-300">
+                    
                     <div class="flex justify-between items-center mb-4">
-                        <span id="badge-ayat-${idx}" class="w-7 h-7 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">${a.numberInSurah}</span>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="saveBookmark(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" class="px-2.5 py-1 text-slate-400 hover:text-emerald-500 text-xs transition flex items-center gap-1">📌 <span class="hidden sm:inline">Simpan</span></button>
-                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`)" class="px-2.5 py-1 text-slate-400 hover:text-emerald-500 text-xs transition flex items-center gap-1">🔗 <span class="hidden sm:inline">Share</span></button>
+                        <span id="badge-ayat-${idx}" class="w-7 h-7 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-emerald-500/20">
+                            ${a.numberInSurah}
+                        </span>
+                        
+                        <div class="flex items-center gap-2">
+                            <!-- TOMBOL PUTAR AUDIO (IKON SAJA) DIPINDAH KE KANAN ATAS -->
+                            <button id="btnPlayAyat-${idx}" onclick="clickPlayAyatBtn(${idx})" class="w-8 h-8 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs transition">
+                                <span id="btnIconAyat-${idx}">▶️</span>
+                            </button>
+
+                            <button onclick="saveBookmark(${currentSurahNo}, '${surahName}', ${a.numberInSurah})" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center text-xs transition" title="Simpan Bookmark">
+                                📌
+                            </button>
+                            
+                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 hover:text-emerald-500 flex items-center justify-center text-xs transition" title="Bagikan">
+                                🔗
+                            </button>
                         </div>
                     </div>
+
                     <div class="text-right font-arabic text-2xl sm:text-3xl mb-3 text-slate-800 dark:text-slate-100 tracking-wide leading-relaxed">${a.textArab}</div>
+                    
                     ${a.textLatin ? `<div class="text-xs sm:text-sm italic font-medium text-emerald-700 dark:text-emerald-400/90 leading-relaxed mb-3">${a.textLatin}</div>` : ''}
-                    <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal mb-4">${a.textTrans}</div>
-                    <div class="pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-end">
-                        <button id="btnPlayAyat-${idx}" onclick="clickPlayAyatBtn(${idx})" class="px-3 py-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"><span id="btnIconAyat-${idx}">▶️</span><span id="btnTextAyat-${idx}">Putar Audio</span></button>
+                    
+                    <div class="trans-text text-slate-600 dark:text-slate-300 leading-relaxed font-normal" style="font-size: ${currentFontSize}px;">
+                        ${a.textTrans}
                     </div>
+
                 </div>
             `).join('');
         }
@@ -843,25 +852,24 @@
             btnBarPlayPause.textContent = isPaused ? '▶️' : '⏸️';
             if (currentPlayingIndex !== -1) {
                 const btnIcon = document.getElementById(`btnIconAyat-${currentPlayingIndex}`);
-                const btnText = document.getElementById(`btnTextAyat-${currentPlayingIndex}`);
-                if (btnIcon && btnText) {
+                if (btnIcon) {
                     btnIcon.textContent = isPaused ? '▶️' : '⏸️';
-                    btnText.textContent = isPaused ? 'Lanjutkan' : 'Jeda';
                 }
             }
         }
 
         function highlightAyatCard(index) {
             const card = document.getElementById(`ayat-card-${index}`);
+            const btnIcon = document.getElementById(`btnIconAyat-${index}`);
             if (card) { card.classList.add('karaoke-active'); }
+            if (btnIcon) { btnIcon.textContent = '⏸️'; }
         }
 
         function resetAyatCardUI(index) {
             const card = document.getElementById(`ayat-card-${index}`);
             const btnIcon = document.getElementById(`btnIconAyat-${index}`);
-            const btnText = document.getElementById(`btnTextAyat-${index}`);
             if (card) { card.classList.remove('karaoke-active'); }
-            if (btnIcon && btnText) { btnIcon.textContent = '▶️'; btnText.textContent = 'Putar Audio'; }
+            if (btnIcon) { btnIcon.textContent = '▶️'; }
         }
 
         async function saveBookmark(surahNo, surahName, ayatNo) {
