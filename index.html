@@ -229,12 +229,12 @@
 
             <!-- Profile View -->
             <div id="userProfileView" class="hidden text-center space-y-4 py-2">
-                <div class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold">
+                <div id="userAvatarContainer" class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold overflow-hidden shadow-inner">
                     👤
                 </div>
                 <div>
                     <h3 class="font-bold text-base text-slate-800 dark:text-slate-100" id="profileEmail">user@email.com</h3>
-                    <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                         Akun Terverifikasi
                     </span>
                 </div>
@@ -339,7 +339,7 @@
     <script>
         // CONFIG SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
 
         // REST API DIRECT SUPABASE FETCH ENGINE
         const SupabaseApi = {
@@ -411,6 +411,7 @@
         const authModal = document.getElementById('authModal');
         const authFormView = document.getElementById('authFormView');
         const userProfileView = document.getElementById('userProfileView');
+        const userAvatarContainer = document.getElementById('userAvatarContainer');
         const authTitle = document.getElementById('authTitle');
         const authSubtitle = document.getElementById('authSubtitle');
         const btnSubmitAuth = document.getElementById('btnSubmitAuth');
@@ -445,20 +446,20 @@
             initTheme();
             restoreSettingsUI();
             
-            // 1. TANGKAP TOKEN OAUTH GOOGLE TERLEBIH DAHULU SEBELUM NAVIGASI SURAH
+            // 1. Tangkap Token Google OAuth
             await checkOAuthCallback();
             
-            // 2. UPDATE UI PROFIL
+            // 2. Render UI User
             updateUserUI();
 
-            // 3. LOAD DATA QURAN
+            // 3. Muat Data Al-Qur'an
             await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
             restoreSessionState();
         });
 
-        // HANDLER LOGIN GOOGLE (OAUTH)
+        // HANDLER GOOGLE LOGIN
         function handleGoogleLogin() {
             const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
             window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
@@ -467,7 +468,6 @@
         async function checkOAuthCallback() {
             const hash = window.location.hash;
             if (hash && hash.includes('access_token=')) {
-                // Parse parameter access_token dari URL hash
                 const rawParams = hash.replace('#', '?');
                 const params = new URLSearchParams(rawParams);
                 const accessToken = params.get('access_token');
@@ -486,7 +486,7 @@
                             currentUserSession = { access_token: accessToken, user: user };
                             localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
                             
-                            // Bersihkan URL hash OAuth agar tidak merusak navigasi surah
+                            // Bersihkan URL Hash agar tidak merusak navigasi surah
                             history.replaceState(null, null, window.location.pathname);
                         }
                     } catch (err) {
@@ -496,15 +496,24 @@
             }
         }
 
-        // AUTH HANDLERS
+        // AUTH UI HANDLERS
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
                 const userObj = currentUserSession.user;
-                // Ambil email dari akun atau dari user_metadata (khusus akun Google)
-                const email = userObj.email || (userObj.user_metadata ? userObj.user_metadata.email : '') || 'Pengguna Google';
-                
-                authBtnText.textContent = email.includes('@') ? email.split('@')[0] : 'Profil';
+                const metadata = userObj.user_metadata || {};
+                const email = userObj.email || metadata.email || 'Pengguna Google';
+                const name = metadata.full_name || metadata.name || (email.includes('@') ? email.split('@')[0] : 'Profil');
+                const avatarUrl = metadata.avatar_url || metadata.picture;
+
+                authBtnText.textContent = name;
                 profileEmail.textContent = email;
+
+                if (avatarUrl) {
+                    userAvatarContainer.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover">`;
+                } else {
+                    userAvatarContainer.innerHTML = '👤';
+                }
+
                 userProfileView.classList.remove('hidden');
                 authFormView.classList.add('hidden');
             } else {
@@ -543,7 +552,7 @@
 
             try {
                 if (isSignUpMode) {
-                    const result = await SupabaseApi.signUp(email, password);
+                    await SupabaseApi.signUp(email, password);
                     alert('Pendaftaran berhasil! Silakan periksa email/inbox Anda untuk mengonfirmasi pendaftaran.');
                     toggleAuthMode();
                 } else {
@@ -671,7 +680,6 @@
             
             localStorage.setItem('quran_last_opened_surah', surahNo);
             
-            // Atur Hash Surah hanya jika tidak ada token Google yang sedang aktif dibaca
             if (!window.location.hash.includes('access_token')) {
                 window.location.hash = `surah-${surahNo}`;
             }
