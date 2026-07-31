@@ -51,15 +51,13 @@
             border-radius: 10px;
         }
 
-        /* CLASS WARNA TAJWID RESPONSIF */
-        .tj-ghunnah { color: #ff7e00 !important; font-weight: bold; }
-        .tj-ikhfa { color: #9400d3 !important; font-weight: bold; }
-        .tj-idgham { color: #1e90ff !important; font-weight: bold; }
-        .tj-qalqalah { color: #dd2c00 !important; font-weight: bold; }
-        .tj-iqlab { color: #008000 !important; font-weight: bold; }
-        .tj-mad { color: #e91e63 !important; }
-        .tj-hamwasl { color: #888888 !important; }
-        .tj-silent { color: #aaaaaa !important; }
+        /* ATURAN WARNA TAJWID */
+        .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }      /* Ikhfa: Merah */
+        .tj-idgham { color: #10b981 !important; font-weight: bold; }     /* Idgham / Ghunnah: Hijau */
+        .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }   /* Qalqalah: Biru */
+        .tj-iqlab { color: #f59e0b !important; font-weight: bold; }      /* Iqlab: Oranye */
+        .tj-mad { color: #ec4899 !important; }                        /* Mad: Merah Muda / Pink */
+        .tj-silent { color: #9ca3af !important; }                     /* Hamzah Wasal / Sukun / Silent: Abu-abu */
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
@@ -176,7 +174,7 @@
                 </select>
             </div>
 
-            <!-- TAJWID BERWARNA -->
+            <!-- TAJWID BERWARNA SELECT -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🎨 Tajwid:</span>
                 <select id="tajweedSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
@@ -192,6 +190,15 @@
                     <option value="single" class="dark:bg-darkCard">🔂 Berhenti Per-Ayat</option>
                 </select>
             </div>
+        </div>
+
+        <!-- PANDUAN WARNA TAJWID (LEGENDA) -->
+        <div id="tajweedLegend" class="bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-[11px] flex flex-wrap items-center justify-around gap-2 font-medium">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Ikhfa (Merah)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Idgham / Ghunnah (Hijau)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Qalqalah (Biru)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Iqlab (Oranye)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-pink-500 inline-block"></span> Mad (Pink)</span>
         </div>
 
         <!-- AREA BACA / DETAIL SURAH -->
@@ -448,6 +455,7 @@
         const langSelect = document.getElementById('langSelect');
         const qoriSelect = document.getElementById('qoriSelect');
         const tajweedSelect = document.getElementById('tajweedSelect');
+        const tajweedLegend = document.getElementById('tajweedLegend');
         const audioModeSelect = document.getElementById('audioModeSelect');
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
@@ -610,6 +618,12 @@
             qoriSelect.value = selectedQori;
             audioModeSelect.value = playMode;
             tajweedSelect.value = isTajweedEnabled.toString();
+            
+            if (isTajweedEnabled) {
+                tajweedLegend.classList.remove('hidden');
+            } else {
+                tajweedLegend.classList.add('hidden');
+            }
         }
 
         function initTheme() {
@@ -696,28 +710,40 @@
             return arabicPattern.test(text);
         }
 
-        // FUNGSI PARSER KODE TAJWID BRAKETS DARI API
+        // FUNGSI PARSER FORMAT TAJWID LENGKAP ([f:..., [n:..., [m:..., [q:..., dll)
         function parseTajweedCode(text) {
             if (!text) return '';
-            
-            // Map Aturan Tajwid
             let parsed = text;
-            parsed = parsed.replace(/\[h:[0-9]+\[/g, '<span class="tj-hamwasl">');
-            parsed = parsed.replace(/\[s\[/g, '<span class="tj-silent">');
-            parsed = parsed.replace(/\[l\[/g, '<span class="tj-slnt">');
-            parsed = parsed.replace(/\[n\[/g, '<span class="tj-ghunnah">');
-            parsed = parsed.replace(/\[m\[/g, '<span class="tj-idgham">');
-            parsed = parsed.replace(/\[p\[/g, '<span class="tj-iqlab">');
+
+            // 1. Ganti pembuka tajwid berpola [x:ID[ menjadi tag span dengan class warna
+            parsed = parsed.replace(/\[f:[0-9]+\[/g, '<span class="tj-ikhfa">');      // f = Ikhfa (Merah)
+            parsed = parsed.replace(/\[n:[0-9]+\[/g, '<span class="tj-idgham">');     // n = Ghunnah (Hijau)
+            parsed = parsed.replace(/\[m:[0-9]+\[/g, '<span class="tj-idgham">');     // m = Idgham (Hijau)
+            parsed = parsed.replace(/\[q:[0-9]+\[/g, '<span class="tj-qalqalah">');   // q = Qalqalah (Biru)
+            parsed = parsed.replace(/\[p:[0-9]+\[/g, '<span class="tj-iqlab">');      // p = Iqlab (Oranye)
+            parsed = parsed.replace(/\[c:[0-9]+\[/g, '<span class="tj-mad">');        // c = Mad (Pink)
+            parsed = parsed.replace(/\[w:[0-9]+\[/g, '<span class="tj-mad">');        // w = Mad (Pink)
+            parsed = parsed.replace(/\[a:[0-9]+\[/g, '<span class="tj-mad">');        // a = Mad (Pink)
+            parsed = parsed.replace(/\[o:[0-9]+\[/g, '<span class="tj-mad">');        // o = Mad (Pink)
+            parsed = parsed.replace(/\[h:[0-9]+\[/g, '<span class="tj-silent">');     // h = Hamzah Wasal (Abu-abu)
+            parsed = parsed.replace(/\[s:[0-9]+\[/g, '<span class="tj-silent">');     // s = Sukun/Silent (Abu-abu)
+
+            // 2. Ganti pembuka tanpa ID
             parsed = parsed.replace(/\[f\[/g, '<span class="tj-ikhfa">');
+            parsed = parsed.replace(/\[n\[/g, '<span class="tj-idgham">');
+            parsed = parsed.replace(/\[m\[/g, '<span class="tj-idgham">');
             parsed = parsed.replace(/\[q\[/g, '<span class="tj-qalqalah">');
-            parsed = parsed.replace(/\[o\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[p\[/g, '<span class="tj-iqlab">');
             parsed = parsed.replace(/\[c\[/g, '<span class="tj-mad">');
             parsed = parsed.replace(/\[w\[/g, '<span class="tj-mad">');
-            parsed = parsed.replace(/\[i\[/g, '<span class="tj-mad">');
             parsed = parsed.replace(/\[a\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[o\[/g, '<span class="tj-mad">');
+            parsed = parsed.replace(/\[h\[/g, '<span class="tj-silent">');
+            parsed = parsed.replace(/\[s\[/g, '<span class="tj-silent">');
 
-            // Tutup Tag
+            // 3. Tutup kurung penutup tajwid ']' menjadi </span>
             parsed = parsed.replace(/\]/g, '</span>');
+
             return parsed;
         }
 
@@ -765,7 +791,7 @@
                         if (containsArabic(latinText)) latinText = '';
                     }
 
-                    // Render Tajwid secara visual jika Tajwid Diaktifkan
+                    // Parse tajwid jika opsi Berwarna diaktifkan
                     let formattedArab = ayah.text;
                     if (isTajweedEnabled) {
                         formattedArab = parseTajweedCode(ayah.text);
@@ -818,6 +844,13 @@
         tajweedSelect.addEventListener('change', (e) => {
             isTajweedEnabled = e.target.value === 'true';
             localStorage.setItem('quran_tajweed', isTajweedEnabled);
+            
+            if (isTajweedEnabled) {
+                tajweedLegend.classList.remove('hidden');
+            } else {
+                tajweedLegend.classList.add('hidden');
+            }
+
             if (currentSurahNo) loadSurah(currentSurahNo);
         });
 
