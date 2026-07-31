@@ -70,15 +70,18 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Tombol Auth User / Login -->
                 <button id="btnAuth" onclick="openAuthModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-xs hover:bg-emerald-500 hover:text-white transition flex items-center gap-1.5 shadow-sm">
                     <span id="authBtnIcon">👤</span>
                     <span id="authBtnText">Masuk</span>
                 </button>
 
+                <!-- Tombol Cari -->
                 <button id="btnOpenSearch" onclick="openSearchModal()" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     🔍
                 </button>
 
+                <!-- Tombol Mode Gelap -->
                 <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     <span id="themeIcon">☀️</span>
                 </button>
@@ -441,7 +444,10 @@
         document.addEventListener('DOMContentLoaded', async () => {
             initTheme();
             restoreSettingsUI();
-            checkOAuthCallback();
+            
+            // PROSES OAUTH TANGKAP TOKEN GOOGLE PERTAMA KALI
+            await checkOAuthCallback();
+            
             updateUserUI();
             await fetchSurahList();
             checkBookmark();
@@ -455,30 +461,32 @@
             window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
         }
 
-        function checkOAuthCallback() {
+        async function checkOAuthCallback() {
             const hash = window.location.hash;
             if (hash && hash.includes('access_token=')) {
                 const params = new URLSearchParams(hash.replace('#', '?'));
                 const accessToken = params.get('access_token');
                 
                 if (accessToken) {
-                    fetch(`${SUPABASE_URL}/auth/v1/user`, {
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${accessToken}`
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(user => {
+                    try {
+                        const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${accessToken}`
+                            }
+                        });
+                        const user = await res.json();
+                        
                         if (user && user.id) {
                             currentUserSession = { access_token: accessToken, user: user };
                             localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
-                            updateUserUI();
-                            window.location.hash = '';
-                            alert('Berhasil login dengan Google!');
+                            
+                            // Bersihkan URL Hash agar tidak mengganggu navigasi surah
+                            history.replaceState(null, null, window.location.pathname);
                         }
-                    })
-                    .catch(err => console.error('OAuth token parse error:', err));
+                    } catch (err) {
+                        console.error('OAuth token parse error:', err);
+                    }
                 }
             }
         }
@@ -486,8 +494,8 @@
         // AUTH HANDLERS
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
-                const email = currentUserSession.user.email;
-                authBtnText.textContent = email ? email.split('@')[0] : 'Profil';
+                const email = currentUserSession.user.email || 'Pengguna Google';
+                authBtnText.textContent = email.split('@')[0];
                 profileEmail.textContent = email;
                 userProfileView.classList.remove('hidden');
                 authFormView.classList.add('hidden');
@@ -654,7 +662,11 @@
             currentSurahNo = surahNo;
             
             localStorage.setItem('quran_last_opened_surah', surahNo);
-            window.location.hash = `surah-${surahNo}`;
+            
+            // Tetapkan URL hash hanya jika tidak sedang memproses callback token login
+            if (!window.location.hash.includes('access_token')) {
+                window.location.hash = `surah-${surahNo}`;
+            }
 
             placeholderView.classList.add('hidden');
             surahHeader.classList.remove('hidden');
