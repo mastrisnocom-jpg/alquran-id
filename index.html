@@ -50,6 +50,16 @@
             background: rgba(16, 185, 129, 0.3);
             border-radius: 10px;
         }
+
+        /* STYLING WARNA TAJWID */
+        tajweed[class*="ghunnah"], .tajweed-ghunnah { color: #ff7e00 !important; font-weight: bold; }
+        tajweed[class*="ikhfa"], .tajweed-ikhfa { color: #9400d3 !important; font-weight: bold; }
+        tajweed[class*="idgham"], .tajweed-idgham { color: #1e90ff !important; font-weight: bold; }
+        tajweed[class*="qlq"], tajweed[class*="qalqalah"], .tajweed-qalqalah { color: #dd2c00 !important; font-weight: bold; }
+        tajweed[class*="iqlab"], .tajweed-iqlab { color: #008000 !important; font-weight: bold; }
+        tajweed[class*="mad"], .tajweed-mad { color: #e91e63 !important; }
+        tajweed[class*="ham_wasl"] { color: #888888 !important; }
+        tajweed[class*="slnt"], tajweed[class*="silent"] { color: #aaaaaa !important; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
@@ -141,8 +151,8 @@
             </div>
         </div>
 
-        <!-- BARIS FILTER -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-xs">
+        <!-- BARIS FILTER BAHASA, QORI, TAJWID & MODE AUDIO -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-xs">
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🌐 Bahasa:</span>
                 <select id="langSelect" class="bg-transparent font-medium focus:outline-none cursor-pointer w-full">
@@ -163,6 +173,15 @@
                     <option value="ar.abdurrahmaanasassudais" class="dark:bg-darkCard">Abdurrahman As-Sudais</option>
                     <option value="ar.hudhaify" class="dark:bg-darkCard">Ali Al-Hudhaify</option>
                     <option value="ar.husary" class="dark:bg-darkCard">Mahmoud Al-Hussary</option>
+                </select>
+            </div>
+
+            <!-- OPSI BARU: TAJWID BERWARNA -->
+            <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
+                <span>🎨 Tajwid:</span>
+                <select id="tajweedSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
+                    <option value="true" class="dark:bg-darkCard">🌈 Berwarna</option>
+                    <option value="false" class="dark:bg-darkCard">⚫ Polos (Hitam/Putih)</option>
                 </select>
             </div>
 
@@ -403,6 +422,7 @@
         let selectedLang = localStorage.getItem('quran_lang') || 'id.indonesian';
         let selectedQori = localStorage.getItem('quran_qori') || 'ar.alafasy';
         let playMode = localStorage.getItem('quran_playmode') || 'surah';
+        let isTajweedEnabled = localStorage.getItem('quran_tajweed') === 'false' ? false : true;
 
         let globalAudio = new Audio();
         let currentPlayingIndex = -1;
@@ -427,6 +447,7 @@
         const ayatContainer = document.getElementById('ayatContainer');
         const langSelect = document.getElementById('langSelect');
         const qoriSelect = document.getElementById('qoriSelect');
+        const tajweedSelect = document.getElementById('tajweedSelect');
         const audioModeSelect = document.getElementById('audioModeSelect');
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
@@ -588,6 +609,7 @@
             langSelect.value = selectedLang;
             qoriSelect.value = selectedQori;
             audioModeSelect.value = playMode;
+            tajweedSelect.value = isTajweedEnabled.toString();
         }
 
         function initTheme() {
@@ -686,11 +708,14 @@
 
             placeholderView.classList.add('hidden');
             surahHeader.classList.remove('hidden');
-            ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat ayat, latin, dan audio...</div>`;
+            ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat ayat, tajwid, latin, dan audio...</div>`;
 
             try {
+                // Pilih edition Arab standar atau quran-tajweed berdasarkan pilihan
+                const arabEdition = isTajweedEnabled ? 'quran-tajweed' : 'quran-uthmani';
+
                 const [arabicRes, latinPrimaryRes, latinBackupRes, transRes, audioRes] = await Promise.all([
-                    fetch(`https://api.alquran.cloud/v1/surah/${surahNo}`),
+                    fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${arabEdition}`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/en.transliteration`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/quran-latin-id`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${selectedLang}`),
@@ -760,6 +785,12 @@
             if (currentSurahNo) loadSurah(currentSurahNo);
         });
 
+        tajweedSelect.addEventListener('change', (e) => {
+            isTajweedEnabled = e.target.value === 'true';
+            localStorage.setItem('quran_tajweed', isTajweedEnabled);
+            if (currentSurahNo) loadSurah(currentSurahNo);
+        });
+
         audioModeSelect.addEventListener('change', (e) => {
             playMode = e.target.value;
             localStorage.setItem('quran_playmode', playMode);
@@ -779,7 +810,7 @@
                                 class="px-2.5 py-1 text-slate-400 hover:text-emerald-500 text-xs transition flex items-center gap-1">
                                 📌 <span class="hidden sm:inline">Simpan</span>
                             </button>
-                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab}\`)" 
+                            <button onclick="shareAyat('${surahName}', ${a.numberInSurah}, \`${a.textArab.replace(/<[^>]*>/g, '')}\`)" 
                                 class="px-2.5 py-1 text-slate-400 hover:text-emerald-500 text-xs transition flex items-center gap-1">
                                 🔗 <span class="hidden sm:inline">Share</span>
                             </button>
