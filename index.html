@@ -507,7 +507,7 @@
             checkBookmark();
             setupAudioListeners();
             setupToggleListeners();
-            restoreSessionState();
+            await restoreSessionState();
         });
 
         function setupToggleListeners() {
@@ -867,7 +867,10 @@
         }
 
         async function restoreSessionState() {
-            const path = window.location.pathname;
+            // Check redirect path dari file 404.html jika ada
+            let path = sessionStorage.getItem('redirect_path') || window.location.pathname;
+            sessionStorage.removeItem('redirect_path');
+
             if (path.startsWith('/surah/')) {
                 const surahNoFromUrl = path.split('/surah/')[1];
                 if (surahNoFromUrl && !isNaN(surahNoFromUrl)) {
