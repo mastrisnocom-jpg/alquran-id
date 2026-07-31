@@ -35,8 +35,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Scheherazade+New:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Supabase JS Client CDN Resmi -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
@@ -334,21 +334,16 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // ================= CONFIG SUPABASE AUTO-INIT =================
+        // CONFIG SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
-        const SUPABASE_ANON_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
         
         let supabase = null;
 
-        // Pengecekan Aman Inisialisasi Supabase SDK Universal
         function initSupabase() {
             try {
-                if (typeof supabase !== 'undefined' && supabase && typeof supabase.createClient === 'function') {
-                    return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                } else if (window.supabase && typeof window.supabase.createClient === 'function') {
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
                     return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                } else if (typeof createClient === 'function') {
-                    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 }
             } catch (e) {
                 console.warn('Inisialisasi Supabase terlewati:', e);
@@ -406,7 +401,7 @@
         const btnContinue = document.getElementById('btnContinue');
 
         document.addEventListener('DOMContentLoaded', async () => {
-            supabase = initSupabase(); // Jalankan inisialisasi resmi
+            supabase = initSupabase();
             initTheme();
             restoreSettingsUI();
             checkUserSession();
@@ -470,10 +465,8 @@
 
         async function handleAuthSubmit(e) {
             e.preventDefault();
-            if (!supabase) {
-                supabase = initSupabase();
-                if (!supabase) return alert('Gagal menghubungkan ke Supabase. Pastikan koneksi internet stabil.');
-            }
+            if (!supabase) supabase = initSupabase();
+            if (!supabase) return alert('Sistem database belum siap. Mohon pastikan koneksi terhubung.');
 
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value.trim();
