@@ -57,7 +57,7 @@
     <!-- 1. HEADER / NAVBAR Bergstyle NU Online -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
                 <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-xl">
                     📖
                 </div>
@@ -256,9 +256,11 @@
         let allSurahs = [];
         let currentSurahNo = null;
         let currentSurahData = null;
-        let selectedLang = 'id.indonesian';
-        let selectedQori = 'ar.alafasy';
-        let playMode = 'surah';
+        
+        // Load Settings dari LocalStorage jika ada
+        let selectedLang = localStorage.getItem('quran_lang') || 'id.indonesian';
+        let selectedQori = localStorage.getItem('quran_qori') || 'ar.alafasy';
+        let playMode = localStorage.getItem('quran_playmode') || 'surah';
 
         let globalAudio = new Audio();
         let currentPlayingIndex = -1;
@@ -287,12 +289,21 @@
         const lastReadAyat = document.getElementById('lastReadAyat');
         const btnContinue = document.getElementById('btnContinue');
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             initTheme();
-            fetchSurahList();
+            restoreSettingsUI();
+            await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
+            restoreSessionState(); // Memuat kembali surah/posisi sebelum refresh
         });
+
+        // Simpan UI State Pengaturan
+        function restoreSettingsUI() {
+            langSelect.value = selectedLang;
+            qoriSelect.value = selectedQori;
+            audioModeSelect.value = playMode;
+        }
 
         function initTheme() {
             if (localStorage.theme === 'light') {
@@ -374,21 +385,25 @@
         function quickLoadSurah(no) { loadSurah(no); }
         function selectSurah(surahNo) { closeSearchModal(); loadSurah(surahNo); }
 
-        // Fungsi Memeriksa Karakter Arab (Untuk memvalidasi latin agar tidak keluar huruf Arab)
         function containsArabic(text) {
             const arabicPattern = /[\u0600-\u06FF]/;
             return arabicPattern.test(text);
         }
 
+        // Tembak API & Simpan Sesi
         async function loadSurah(surahNo) {
             stopAudio();
             currentSurahNo = surahNo;
+            
+            // Simpan posisi terakhir ke LocalStorage & URL Hash
+            localStorage.setItem('quran_last_opened_surah', surahNo);
+            window.location.hash = `surah-${surahNo}`;
+
             placeholderView.classList.add('hidden');
             surahHeader.classList.remove('hidden');
             ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat ayat, latin, dan audio...</div>`;
 
             try {
-                // Fetch paralel termasuk latin sekunder jika primary return arab
                 const [arabicRes, latinPrimaryRes, latinBackupRes, transRes, audioRes] = await Promise.all([
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/en.transliteration`),
@@ -411,8 +426,6 @@
 
                 currentSurahData = surahInfo.ayahs.map((ayah, index) => {
                     let latinText = latinPrimaryData.data && latinPrimaryData.data.ayahs[index] ? latinPrimaryData.data.ayahs[index].text : '';
-                    
-                    // Jika data latin mengandung huruf Arab (bug API), ganti dengan backup atau teks kosong
                     if (containsArabic(latinText)) {
                         latinText = latinBackupData.data && latinBackupData.data.ayahs[index] ? latinBackupData.data.ayahs[index].text : '';
                         if (containsArabic(latinText)) latinText = '';
@@ -434,18 +447,41 @@
             }
         }
 
+        // Restorasi Otomatis Saat Refresh
+        async function restoreSessionState() {
+            let lastSurah = localStorage.getItem('quran_last_opened_surah');
+            
+            // Cek URL Hash terlebih dahulu
+            if (window.location.hash.startsWith('#surah-')) {
+                lastSurah = window.location.hash.replace('#surah-', '');
+            }
+
+            if (lastSurah) {
+                await loadSurah(parseInt(lastSurah));
+            }
+        }
+
+        function resetToHome() {
+            localStorage.removeItem('quran_last_opened_surah');
+            window.location.hash = '';
+            window.location.reload();
+        }
+
         langSelect.addEventListener('change', (e) => {
             selectedLang = e.target.value;
+            localStorage.setItem('quran_lang', selectedLang);
             if (currentSurahNo) loadSurah(currentSurahNo);
         });
 
         qoriSelect.addEventListener('change', (e) => {
             selectedQori = e.target.value;
+            localStorage.setItem('quran_qori', selectedQori);
             if (currentSurahNo) loadSurah(currentSurahNo);
         });
 
         audioModeSelect.addEventListener('change', (e) => {
             playMode = e.target.value;
+            localStorage.setItem('quran_playmode', playMode);
         });
 
         function renderAyat(ayahs, surahName) {
@@ -477,7 +513,7 @@
                     <!-- Teks Latin -->
                     ${a.textLatin ? `<div class="text-xs sm:text-sm italic font-medium text-emerald-700 dark:text-emerald-400/90 leading-relaxed mb-3">${a.textLatin}</div>` : ''}
 
-                    <!-- Terjemahan Bahasa yang Dipilih -->
+                    <!-- Terjemahan Bahasa -->
                     <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal mb-4">
                         ${a.textTrans}
                     </div>
@@ -517,12 +553,14 @@
         function playModeSurah() {
             playMode = 'surah';
             audioModeSelect.value = 'surah';
+            localStorage.setItem('quran_playmode', 'surah');
             playAyatByIndex(0);
         }
 
         function playModeFirstAyat() {
             playMode = 'single';
             audioModeSelect.value = 'single';
+            localStorage.setItem('quran_playmode', 'single');
             playAyatByIndex(0);
         }
 
