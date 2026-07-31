@@ -46,7 +46,6 @@
             font-family: 'Scheherazade New', serif;
             line-height: 2.3;
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -64,10 +63,10 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
 
-    <!-- Ambient Background Lighting (Glow Effect) -->
+    <!-- Ambient Glow Background -->
     <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-emerald-500/10 via-teal-500/5 to-transparent pointer-events-none blur-3xl -z-10"></div>
 
-    <!-- Header / Navbar Navbar -->
+    <!-- Header / Navbar -->
     <header class="sticky top-0 z-50 bg-white/70 dark:bg-darkCard/70 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-4">
             
@@ -150,19 +149,18 @@
 
             <!-- Search Input -->
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="Cari surah (contoh: Al-Fatihah, Ya-Sin)..." 
+                <input type="text" id="searchInput" placeholder="Cari surah (ketik nama atau nomor)..." 
                     class="w-full pl-10 pr-4 py-3 rounded-2xl bg-white dark:bg-darkCard/80 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs shadow-sm transition">
                 <span class="absolute left-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
             </div>
 
-            <!-- Daftar Surah (Scrollable) -->
-            <div id="surahList" class="bg-white dark:bg-darkCard/60 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm overflow-y-auto max-h-[60vh] lg:max-h-[68vh] p-2 space-y-1">
-                <div class="text-center py-8 text-slate-400 text-xs">Memuat daftar surah...</div>
+            <!-- Box Hasil Pencarian (Otomatis disembunyikan/di-clear saat surah diklik) -->
+            <div id="surahList" class="hidden bg-white dark:bg-darkCard/60 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm overflow-y-auto max-h-[50vh] lg:max-h-[60vh] p-2 space-y-1">
             </div>
         </aside>
 
         <!-- Right Section: Detail Surah & Teks Ayat (8 cols) -->
-        <section class="lg:col-span-8">
+        <section class="lg:col-span-8" id="mainReadArea">
             <div id="surahDetail" class="bg-white dark:bg-darkCard/60 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm p-4 sm:p-8 min-h-[600px] flex flex-col">
                 
                 <!-- Empty Placeholder -->
@@ -170,8 +168,8 @@
                     <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/10 flex items-center justify-center text-4xl">
                         ✨
                     </div>
-                    <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Pilih Surah untuk Memulai</h3>
-                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Jelajahi ayat-ayat suci Al-Qur'an lengkap dengan audio Qori internasional dan terjemahan berbagai bahasa.</p>
+                    <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Cari Surah untuk Memulai</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Ketik nama surah pada kolom pencarian di sebelah kiri untuk memilih dan membacanya.</p>
                 </div>
 
                 <!-- Header Surah -->
@@ -219,6 +217,7 @@
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const globalAudioPlayer = document.getElementById('globalAudioPlayer');
+        const mainReadArea = document.getElementById('mainReadArea');
 
         // Bookmark Elements
         const lastReadWidget = document.getElementById('lastReadWidget');
@@ -256,21 +255,29 @@
             }
         });
 
-        // 2. Fetch Daftar Surah
+        // 2. Fetch Data Surah dari Server
         async function fetchSurahList() {
             try {
                 const res = await fetch('https://api.alquran.cloud/v1/surah');
                 const data = await res.json();
                 allSurahs = data.data;
-                renderSurahList(allSurahs);
             } catch (err) {
-                surahListEl.innerHTML = `<div class="p-4 text-xs text-red-400 text-center">Gagal memuat daftar surah. Periksa koneksi internet Anda.</div>`;
+                console.error(err);
             }
         }
 
-        function renderSurahList(surahs) {
+        // Render daftar pencarian
+        function renderSearchResults(surahs) {
+            if (surahs.length === 0) {
+                surahListEl.innerHTML = `
+                    <div class="text-center py-6 px-4 text-slate-400 text-xs">
+                        Tidak ada surah yang cocok.
+                    </div>`;
+                return;
+            }
+
             surahListEl.innerHTML = surahs.map(s => `
-                <div onclick="loadSurah(${s.number})" 
+                <div onclick="selectAndHideResults(${s.number})" 
                     class="group p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition flex items-center justify-between border border-transparent hover:border-slate-200 dark:hover:border-slate-700/50">
                     <div class="flex items-center space-x-3">
                         <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition">
@@ -288,14 +295,37 @@
 
         // Filter Pencarian
         searchInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
+            const val = e.target.value.toLowerCase().trim();
+
+            if (val === '') {
+                surahListEl.classList.add('hidden');
+                surahListEl.innerHTML = '';
+                return;
+            }
+
             const filtered = allSurahs.filter(s => 
                 s.englishName.toLowerCase().includes(val) || 
                 s.englishNameTranslation.toLowerCase().includes(val) ||
                 s.number.toString() === val
             );
-            renderSurahList(filtered);
+
+            surahListEl.classList.remove('hidden');
+            renderSearchResults(filtered);
         });
+
+        // FUNGSI UTAMA: Saat item surah diklik, sembunyikan pencarian & langsung scroll ke hasil
+        async function selectAndHideResults(surahNo) {
+            // 1. Kosongkan & Sembunyikan daftar hasil pencarian
+            searchInput.value = '';
+            surahListEl.classList.add('hidden');
+            surahListEl.innerHTML = '';
+
+            // 2. Load isi surah
+            await loadSurah(surahNo);
+
+            // 3. Otomatis scroll layar langsung ke area baca surah
+            mainReadArea.scrollIntoView({ behavior: 'smooth' });
+        }
 
         // 3. Load Surah Detail (Teks Arab + Terjemahan Multi-Bahasa + Audio)
         async function loadSurah(surahNo) {
@@ -305,7 +335,6 @@
             ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat teks, audio, dan terjemahan...</div>`;
 
             try {
-                // Fetch Arab Teks, Terjemahan Bahasa terpilih, dan Audio Qori terpilih sekaligus
                 const [arabicRes, transRes, audioRes] = await Promise.all([
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${selectedLang}`),
@@ -323,7 +352,7 @@
                 document.getElementById('activeSurahName').textContent = `${surahInfo.englishName} (${surahInfo.name})`;
                 document.getElementById('activeSurahTranslation').textContent = `${surahInfo.revelationType} • ${surahInfo.numberOfAyahs} AYAT — ${surahInfo.englishNameTranslation}`;
 
-                // Set Full Surah Audio (Jika tersedia dari Qori)
+                // Set Full Surah Audio
                 if (audioData.data.ayahs.length > 0) {
                     globalAudioPlayer.src = audioData.data.ayahs[0].audio; 
                 }
