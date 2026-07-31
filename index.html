@@ -57,8 +57,6 @@
     <!-- 1. HEADER / NAVBAR Bergstyle NU Online -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            
-            <!-- Logo Brand -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
                 <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-xl">
                     📖
@@ -71,17 +69,14 @@
                 </div>
             </div>
 
-            <!-- Right Controls: Search Icon & Theme Toggle -->
             <div class="flex items-center gap-2">
                 <button id="btnOpenSearch" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     🔍
                 </button>
-
                 <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     <span id="themeIcon">☀️</span>
                 </button>
             </div>
-
         </div>
     </header>
 
@@ -139,8 +134,6 @@
 
         <!-- 4. BARIS FILTER BAHASA, QORI & MODE AUDIO -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-xs">
-            
-            <!-- Select Bahasa -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🌐 Bahasa:</span>
                 <select id="langSelect" class="bg-transparent font-medium focus:outline-none cursor-pointer w-full">
@@ -154,7 +147,6 @@
                 </select>
             </div>
 
-            <!-- Select Qori -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🎙️ Qori:</span>
                 <select id="qoriSelect" class="bg-transparent font-medium focus:outline-none cursor-pointer w-full">
@@ -165,7 +157,6 @@
                 </select>
             </div>
 
-            <!-- Mode Pemutaran Audio -->
             <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-emerald-700 dark:text-emerald-400 font-medium">
                 <span>🎧 Mode Play:</span>
                 <select id="audioModeSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full">
@@ -173,14 +164,12 @@
                     <option value="single" class="dark:bg-darkCard">🔂 Berhenti Per-Ayat</option>
                 </select>
             </div>
-
         </div>
 
         <!-- 5. AREA BACA / DETAIL SURAH -->
         <section id="mainReadArea">
             <div id="surahDetail" class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-6 min-h-[500px]">
                 
-                <!-- Empty Placeholder -->
                 <div id="placeholderView" class="text-center py-16 text-slate-400">
                     <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-emerald-500/10 flex items-center justify-center text-3xl">
                         🔍
@@ -188,7 +177,6 @@
                     <p class="text-xs font-medium">Klik tombol <span class="text-emerald-600 dark:text-emerald-400 font-bold">Cari 🔍</span> di kanan atas untuk memilih Surah.</p>
                 </div>
 
-                <!-- Header Surah -->
                 <div id="surahHeader" class="hidden mb-6 text-center pb-6 border-b border-slate-200 dark:border-slate-800">
                     <span id="activeSurahNumber" class="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         SURAH NO. -
@@ -196,7 +184,6 @@
                     <h2 id="activeSurahName" class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2 tracking-tight"></h2>
                     <p id="activeSurahTranslation" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></p>
                     
-                    <!-- MENU TOMBOL PLAY UTAMA -->
                     <div class="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                         <button id="btnPlayFullSurah" onclick="playModeSurah()" 
                             class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-2">
@@ -217,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- List Ayat -->
                 <div id="ayatContainer" class="space-y-6"></div>
             </div>
         </section>
@@ -274,11 +260,9 @@
         let selectedQori = 'ar.alafasy';
         let playMode = 'surah';
 
-        // State Audio Management
         let globalAudio = new Audio();
         let currentPlayingIndex = -1;
 
-        // DOM Elements
         const searchModal = document.getElementById('searchModal');
         const btnOpenSearch = document.getElementById('btnOpenSearch');
         const searchInput = document.getElementById('searchInput');
@@ -292,14 +276,12 @@
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         
-        // Audio Bar Elements
         const audioBar = document.getElementById('audioBar');
         const audioBarTitle = document.getElementById('audioBarTitle');
         const audioBarSubtitle = document.getElementById('audioBarSubtitle');
         const btnBarPlayPause = document.getElementById('btnBarPlayPause');
         const btnStopAudio = document.getElementById('btnStopAudio');
 
-        // Bookmark Elements
         const lastReadWidget = document.getElementById('lastReadWidget');
         const lastReadSurah = document.getElementById('lastReadSurah');
         const lastReadAyat = document.getElementById('lastReadAyat');
@@ -312,7 +294,6 @@
             setupAudioListeners();
         });
 
-        // Dark Mode Setup
         function initTheme() {
             if (localStorage.theme === 'light') {
                 document.documentElement.classList.remove('dark');
@@ -335,7 +316,6 @@
             }
         });
 
-        // Search Modal Handlers
         btnOpenSearch.addEventListener('click', openSearchModal);
         function openSearchModal() {
             searchModal.classList.remove('hidden');
@@ -394,7 +374,12 @@
         function quickLoadSurah(no) { loadSurah(no); }
         function selectSurah(surahNo) { closeSearchModal(); loadSurah(surahNo); }
 
-        // Fetch Detail Surah Data (Disesuaikan dengan Bahasa untuk Latin)
+        // Fungsi Memeriksa Karakter Arab (Untuk memvalidasi latin agar tidak keluar huruf Arab)
+        function containsArabic(text) {
+            const arabicPattern = /[\u0600-\u06FF]/;
+            return arabicPattern.test(text);
+        }
+
         async function loadSurah(surahNo) {
             stopAudio();
             currentSurahNo = surahNo;
@@ -402,19 +387,19 @@
             surahHeader.classList.remove('hidden');
             ayatContainer.innerHTML = `<div class="text-center py-16 text-xs text-slate-400">Memuat ayat, latin, dan audio...</div>`;
 
-            // Menentukan edisi transliterasi berdasarkan bahasa
-            const latinEdition = selectedLang.startsWith('id') ? 'quran-latin-id' : 'en.transliteration';
-
             try {
-                const [arabicRes, latinRes, transRes, audioRes] = await Promise.all([
+                // Fetch paralel termasuk latin sekunder jika primary return arab
+                const [arabicRes, latinPrimaryRes, latinBackupRes, transRes, audioRes] = await Promise.all([
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}`),
-                    fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${latinEdition}`),
+                    fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/en.transliteration`),
+                    fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/quran-latin-id`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${selectedLang}`),
                     fetch(`https://api.alquran.cloud/v1/surah/${surahNo}/${selectedQori}`)
                 ]);
 
                 const arabicData = await arabicRes.json();
-                const latinData = await latinRes.json();
+                const latinPrimaryData = await latinPrimaryRes.json();
+                const latinBackupData = await latinBackupRes.json();
                 const transData = await transRes.json();
                 const audioData = await audioRes.json();
 
@@ -424,13 +409,23 @@
                 document.getElementById('activeSurahName').textContent = `${surahInfo.englishName} (${surahInfo.name})`;
                 document.getElementById('activeSurahTranslation').textContent = `${surahInfo.revelationType} • ${surahInfo.numberOfAyahs} AYAT — ${surahInfo.englishNameTranslation}`;
 
-                currentSurahData = surahInfo.ayahs.map((ayah, index) => ({
-                    numberInSurah: ayah.numberInSurah,
-                    textArab: ayah.text,
-                    textLatin: latinData.data && latinData.data.ayahs[index] ? latinData.data.ayahs[index].text : '',
-                    textTrans: transData.data && transData.data.ayahs[index] ? transData.data.ayahs[index].text : '',
-                    audioUrl: audioData.data && audioData.data.ayahs[index] ? audioData.data.ayahs[index].audio : ''
-                }));
+                currentSurahData = surahInfo.ayahs.map((ayah, index) => {
+                    let latinText = latinPrimaryData.data && latinPrimaryData.data.ayahs[index] ? latinPrimaryData.data.ayahs[index].text : '';
+                    
+                    // Jika data latin mengandung huruf Arab (bug API), ganti dengan backup atau teks kosong
+                    if (containsArabic(latinText)) {
+                        latinText = latinBackupData.data && latinBackupData.data.ayahs[index] ? latinBackupData.data.ayahs[index].text : '';
+                        if (containsArabic(latinText)) latinText = '';
+                    }
+
+                    return {
+                        numberInSurah: ayah.numberInSurah,
+                        textArab: ayah.text,
+                        textLatin: latinText,
+                        textTrans: transData.data && transData.data.ayahs[index] ? transData.data.ayahs[index].text : '',
+                        audioUrl: audioData.data && audioData.data.ayahs[index] ? audioData.data.ayahs[index].audio : ''
+                    };
+                });
 
                 renderAyat(currentSurahData, surahInfo.englishName);
 
@@ -453,7 +448,6 @@
             playMode = e.target.value;
         });
 
-        // Render Ayat ke Layar
         function renderAyat(ayahs, surahName) {
             ayatContainer.innerHTML = ayahs.map((a, idx) => `
                 <div id="ayat-card-${idx}" class="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 transition">
@@ -480,12 +474,10 @@
                         ${a.textArab}
                     </div>
 
-                    <!-- Teks Latin Disesuaikan -->
-                    <div class="text-xs sm:text-sm italic font-medium text-emerald-700 dark:text-emerald-400/90 leading-relaxed mb-3">
-                        ${a.textLatin}
-                    </div>
+                    <!-- Teks Latin -->
+                    ${a.textLatin ? `<div class="text-xs sm:text-sm italic font-medium text-emerald-700 dark:text-emerald-400/90 leading-relaxed mb-3">${a.textLatin}</div>` : ''}
 
-                    <!-- Terjemahan -->
+                    <!-- Terjemahan Bahasa yang Dipilih -->
                     <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal mb-4">
                         ${a.textTrans}
                     </div>
