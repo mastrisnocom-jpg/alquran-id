@@ -61,9 +61,9 @@
                 <!-- Tombol Cari -->
                 <button type="button" id="btnSearchToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
-                <!-- Container Auth (Dinamis: Berubah Jadi "Keluar" Saat Login) -->
+                <!-- Container Auth -->
                 <div id="authButtonContainer">
-                    <button type="button" id="btnAuthToggle" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button type="button" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
@@ -145,7 +145,7 @@
         </div>
     </div>
 
-    <!-- MODAL AUTH -->
+    <!-- MODAL AUTH (POP-UP LOGIN) -->
     <div id="authModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div class="flex justify-between items-center mb-4">
@@ -179,9 +179,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT LOGIC -->
+    <!-- SCRIPT MASTER -->
     <script>
-        // 1. SUPABASE CONFIGURATION
+        // 1. SUPABASE CLIENT SAFE INIT
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc';
 
@@ -191,126 +191,12 @@
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) {
-            console.warn("Supabase SDK belum dimuat:", e);
+            console.warn("Supabase SDK gagal dipanggil:", e);
         }
 
-        // State Global User
-        let currentUser = null;
-
-        // 2. FUNGSI UPDATE UI DENGAN LOGIKA MASUK / KELUAR
-        function renderUserAuthUI(user) {
-            currentUser = user;
-            const container = document.getElementById('authButtonContainer');
-
-            if (user) {
-                // Tampilan Ketika Sudah Login -> Tombol "Keluar"
-                const userEmailShort = user.email ? user.email.split('@')[0] : 'User';
-                container.innerHTML = `
-                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 pl-2.5 rounded-full border border-slate-200 dark:border-slate-700">
-                        <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 max-w-[80px] sm:max-w-[120px] truncate">
-                            👤 ${userEmailShort}
-                        </span>
-                        <button type="button" onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold text-[11px] transition shadow-sm">
-                            Keluar
-                        </button>
-                    </div>
-                `;
-            } else {
-                // Tampilan Ketika Belum Login -> Tombol "Masuk"
-                container.innerHTML = `
-                    <button type="button" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
-                        Masuk
-                    </button>
-                `;
-            }
-        }
-
-        // Cek Sesi Supabase / Local Storage
-        async function checkSession() {
-            if (supabase) {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    renderUserAuthUI(session.user);
-                } else {
-                    renderUserAuthUI(null);
-                }
-
-                supabase.auth.onAuthStateChange((_event, session) => {
-                    renderUserAuthUI(session ? session.user : null);
-                });
-            } else {
-                // Fallback Local Storage
-                const savedUser = localStorage.getItem('local_quran_user');
-                if (savedUser) {
-                    renderUserAuthUI(JSON.parse(savedUser));
-                } else {
-                    renderUserAuthUI(null);
-                }
-            }
-        }
-
-        // Submit Form Login / Register
-        document.getElementById('authForm').onsubmit = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const msgEl = document.getElementById('authMsg');
-            const btnSubmit = document.getElementById('btnAuthSubmit');
-
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = "Memproses...";
-            msgEl.classList.add('hidden');
-
-            try {
-                if (supabase) {
-                    if (isRegisterMode) {
-                        const { error } = await supabase.auth.signUp({ email, password });
-                        if (error) throw error;
-                        alert("Pendaftaran berhasil! Silakan langsung login.");
-                        toggleAuthMode();
-                    } else {
-                        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-                        if (error) throw error;
-                        closeAuthModal();
-                    }
-                } else {
-                    // Simpan sesi dummy jika tanpa Supabase
-                    const userObj = { email: email };
-                    localStorage.setItem('local_quran_user', JSON.stringify(userObj));
-                    renderUserAuthUI(userObj);
-                    closeAuthModal();
-                }
-            } catch (err) {
-                msgEl.textContent = err.message || "Gagal masuk, periksa email & password.";
-                msgEl.className = "p-2.5 rounded-xl text-xs font-medium text-center mb-3 bg-red-500/10 text-red-500 border border-red-500/20";
-                msgEl.classList.remove('hidden');
-            } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = isRegisterMode ? 'Daftar' : 'Masuk';
-            }
-        };
-
-        // Fungsi Logout
-        window.handleLogout = async function() {
-            if (confirm("Apakah Anda yakin ingin keluar?")) {
-                if (supabase) {
-                    await supabase.auth.signOut();
-                }
-                localStorage.removeItem('local_quran_user');
-                renderUserAuthUI(null);
-            }
-        };
-
-        // 3. UI MODALS & CONTROLS
-        const searchModal = document.getElementById('searchModal');
+        // 2. FUNGSI UTAMA MODAL LOGIN/LOGOUT GLOBAL (Diisolasi agar langsung aktif)
         const authModal = document.getElementById('authModal');
-        const searchInput = document.getElementById('searchInput');
-
-        document.getElementById('btnDarkToggle').onclick = function() {
-            document.documentElement.classList.toggle('dark');
-            document.getElementById('themeIcon').textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-        };
-
+        
         window.openAuthModal = function() {
             document.getElementById('authMsg').classList.add('hidden');
             authModal.classList.remove('hidden');
@@ -330,6 +216,110 @@
             document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
         };
 
+        // Render Tombol UI Auth (Masuk / Keluar)
+        function renderUserAuthUI(user) {
+            const container = document.getElementById('authButtonContainer');
+            if (user) {
+                const emailShort = user.email ? user.email.split('@')[0] : 'User';
+                container.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 pl-2.5 rounded-full border border-slate-200 dark:border-slate-700">
+                        <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 max-w-[80px] sm:max-w-[120px] truncate">
+                            👤 ${emailShort}
+                        </span>
+                        <button type="button" onclick="handleLogout()" class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold text-[11px] transition shadow-sm">
+                            Keluar
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button type="button" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                        Masuk
+                    </button>
+                `;
+            }
+        }
+
+        // Handle Submit Login / Register
+        document.getElementById('authForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const msgEl = document.getElementById('authMsg');
+            const btnSubmit = document.getElementById('btnAuthSubmit');
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Memproses...";
+            msgEl.classList.add('hidden');
+
+            try {
+                if (supabase) {
+                    if (isRegisterMode) {
+                        const { error } = await supabase.auth.signUp({ email, password });
+                        if (error) throw error;
+                        alert("Pendaftaran berhasil! Silakan langsung login.");
+                        document.getElementById('btnToggleAuth').click();
+                    } else {
+                        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+                        if (error) throw error;
+                        renderUserAuthUI(data.user);
+                        authModal.classList.add('hidden');
+                    }
+                } else {
+                    const userObj = { email: email };
+                    localStorage.setItem('local_quran_user', JSON.stringify(userObj));
+                    renderUserAuthUI(userObj);
+                    authModal.classList.add('hidden');
+                }
+            } catch (err) {
+                msgEl.textContent = err.message || "Gagal masuk. Periksa kembali email dan password Anda.";
+                msgEl.className = "p-2.5 rounded-xl text-xs font-medium text-center mb-3 bg-red-500/10 text-red-500 border border-red-500/20";
+                msgEl.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            }
+        };
+
+        window.handleLogout = async function() {
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                if (supabase) {
+                    await supabase.auth.signOut();
+                }
+                localStorage.removeItem('local_quran_user');
+                renderUserAuthUI(null);
+            }
+        };
+
+        // Cek Sesi Saja
+        async function initAuthSession() {
+            if (supabase) {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    renderUserAuthUI(session ? session.user : null);
+
+                    supabase.auth.onAuthStateChange((_event, session) => {
+                        renderUserAuthUI(session ? session.user : null);
+                    });
+                } catch(e) {
+                    console.warn(e);
+                }
+            } else {
+                const localUser = localStorage.getItem('local_quran_user');
+                if (localUser) renderUserAuthUI(JSON.parse(localUser));
+            }
+        }
+        initAuthSession();
+
+        // 3. CONTROL SEARCH & DARK MODE
+        const searchModal = document.getElementById('searchModal');
+        const searchInput = document.getElementById('searchInput');
+
+        document.getElementById('btnDarkToggle').onclick = function() {
+            document.documentElement.classList.toggle('dark');
+            document.getElementById('themeIcon').textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        };
+
         function showSearch() {
             searchModal.classList.remove('hidden');
             if (window.allSurahs) renderSurahSearchList(window.allSurahs);
@@ -343,7 +333,7 @@
             searchInput.value = '';
         };
 
-        // 4. API & SURAH RENDER
+        // 4. API & SURAH LOAD
         window.allSurahs = [];
         let currentSurahNo = null;
         let selectedLang = 'id.indonesian';
@@ -358,6 +348,7 @@
                 console.error("Gagal API Surah:", err);
             }
         }
+        fetchSurahs();
 
         searchInput.oninput = function(e) {
             const val = e.target.value.toLowerCase().trim();
@@ -483,10 +474,6 @@
                 alert('Teks disalin!');
             }
         };
-
-        // Init Aplikasi
-        fetchSurahs();
-        checkSession();
     </script>
 </body>
 </html>
