@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Qur'anul Karim — Supabase Edition</title>
+    <title>Al-Qur'anul Karim — Supabase Auth Edition</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,7 +21,7 @@
         }
     </script>
 
-    <!-- SUPABASE JS CDN -->
+    <!-- SUPABASE JS CDN (v2) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Google Fonts -->
@@ -53,7 +53,7 @@
                 <button id="btnOpenSearch" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
                 <div id="authButtonContainer">
-                    <button id="btnNavAuth" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
@@ -66,7 +66,7 @@
         </div>
     </header>
 
-    <!-- Main Area -->
+    <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-6">
 
         <!-- Widget Last Read -->
@@ -145,8 +145,11 @@
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="authModalTitle" class="text-base font-bold text-emerald-600 dark:text-emerald-400">Masuk ke Akun</h3>
-                <button id="btnCloseAuth" class="text-slate-400 text-lg">✕</button>
+                <button id="btnCloseAuth" onclick="closeAuthModal()" class="text-slate-400 text-lg">✕</button>
             </div>
+
+            <!-- Error Notif Text -->
+            <div id="authMsg" class="hidden mb-3 p-2.5 rounded-xl text-xs font-medium text-center"></div>
 
             <form id="authForm" class="space-y-3">
                 <div>
@@ -165,7 +168,7 @@
 
             <div class="mt-4 text-center text-xs text-slate-400">
                 <span id="authToggleText">Belum punya akun?</span>
-                <button type="button" id="btnToggleAuth" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
+                <button type="button" id="btnToggleAuth" onclick="toggleAuthMode()" class="text-emerald-600 dark:text-emerald-400 font-semibold ml-1 underline">
                     Daftar Akun Baru
                 </button>
             </div>
@@ -174,12 +177,18 @@
 
     <!-- JavaScript Master Script -->
     <script>
-        // Kredensial Supabase
+        // 1. KREDENSIAL SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy';
         
-        // Inisialisasi Supabase
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        // Inisialisasi Supabase Client dengan Opsi Auth Persist
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        }) : null;
 
         // State Global
         let currentUser = null;
@@ -192,9 +201,7 @@
         // DOM Elements
         const authModal = document.getElementById('authModal');
         const authForm = document.getElementById('authForm');
-        const btnNavAuth = document.getElementById('btnNavAuth');
-        const btnCloseAuth = document.getElementById('btnCloseAuth');
-        const btnToggleAuth = document.getElementById('btnToggleAuth');
+        const authMsg = document.getElementById('authMsg');
         const searchModal = document.getElementById('searchModal');
         const btnOpenSearch = document.getElementById('btnOpenSearch');
         const btnCloseSearch = document.getElementById('btnCloseSearch');
@@ -220,78 +227,19 @@
             setupEventListeners();
         });
 
-        // 1. TEKNIS DARK MODE
-        function setupTheme() {
-            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('themeIcon').textContent = '☀️';
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('themeIcon').textContent = '🌙';
-            }
-
-            themeToggle.onclick = () => {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.theme = 'light';
-                    document.getElementById('themeIcon').textContent = '🌙';
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.theme = 'dark';
-                    document.getElementById('themeIcon').textContent = '☀️';
-                }
-            };
-        }
-
-        // 2. TEKNIS PENCARIAN SURAH
-        async function fetchSurahList() {
-            try {
-                const res = await fetch('https://api.alquran.cloud/v1/surah');
-                const data = await res.json();
-                allSurahs = data.data;
-            } catch (err) {
-                console.error("Gagal mengambil data surah:", err);
-            }
-        }
-
-        function renderSurahSearchList(list) {
-            if (!list || list.length === 0) {
-                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Surah tidak ditemukan.</div>`;
+        // --- SISTEM AUTHENTICATION FIX ---
+        async function setupAuthAndSession() {
+            if (!supabase) {
+                console.error("Supabase SDK belum siap.");
                 return;
             }
 
-            surahListEl.innerHTML = list.map(s => `
-                <div onclick="selectSurah(${s.number})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                        <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center">
-                            ${s.number}
-                        </span>
-                        <div>
-                            <h4 class="font-semibold text-xs text-slate-800 dark:text-slate-100">${s.englishName}</h4>
-                            <p class="text-[10px] text-slate-400">${s.englishNameTranslation} • ${s.numberOfAyahs} Ayat</p>
-                        </div>
-                    </div>
-                    <span class="font-arabic text-emerald-600 dark:text-emerald-400 font-semibold">${s.name}</span>
-                </div>
-            `).join('');
-        }
-
-        window.selectSurah = function(surahNo) {
-            searchModal.classList.add('hidden');
-            searchInput.value = '';
-            loadSurah(surahNo);
-            document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // 3. TEKNIS AUTHENTICATION (LOGIN/REGISTER)
-        async function setupAuthAndSession() {
-            if (!supabase) return;
-
+            // Cek Sesi Aktif
             const { data: { session } } = await supabase.auth.getSession();
             updateUserUI(session ? session.user : null);
 
-            supabase.auth.onAuthStateChange((_event, session) => {
+            // Subscriber Status Change Realtime
+            supabase.auth.onAuthStateChange((event, session) => {
                 updateUserUI(session ? session.user : null);
             });
         }
@@ -312,15 +260,71 @@
                 loadBookmarkFromSupabase();
             } else {
                 container.innerHTML = `
-                    <button id="btnNavAuth" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
+                    <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>`;
                 lastReadWidget.classList.add('hidden');
             }
         }
 
-        window.openAuthModal = function() { authModal.classList.remove('hidden'); };
-        window.closeAuthModal = function() { authModal.classList.add('hidden'); };
+        window.openAuthModal = function() {
+            authMsg.classList.add('hidden');
+            authModal.classList.remove('hidden');
+        };
+
+        window.closeAuthModal = function() {
+            authModal.classList.add('hidden');
+        };
+
+        window.toggleAuthMode = function() {
+            isRegisterMode = !isRegisterMode;
+            authMsg.classList.add('hidden');
+            document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
+            document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
+            document.getElementById('btnToggleAuth').textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
+        };
+
+        authForm.onsubmit = async (e) => {
+            e.preventDefault();
+            authMsg.classList.add('hidden');
+
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+
+            if (!supabase) return alert("Koneksi Supabase belum siap.");
+
+            const btnSubmit = document.getElementById('btnAuthSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Memproses...";
+
+            try {
+                if (isRegisterMode) {
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+
+                    showAuthMessage("Pendaftaran berhasil! Silakan langsung login.", false);
+                    toggleAuthMode();
+                } else {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+
+                    showAuthMessage("Berhasil masuk!", false);
+                    setTimeout(() => closeAuthModal(), 1000);
+                }
+            } catch (err) {
+                showAuthMessage(err.message, true);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = isRegisterMode ? 'Daftar' : 'Masuk';
+            }
+        };
+
+        function showAuthMessage(msg, isError = true) {
+            authMsg.textContent = msg;
+            authMsg.className = `p-2.5 rounded-xl text-xs font-medium text-center mb-3 ${isError ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`;
+            authMsg.classList.remove('hidden');
+        }
 
         window.handleLogout = async function() {
             if (supabase) {
@@ -329,30 +333,7 @@
             }
         };
 
-        authForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            if (!supabase) return alert("Koneksi Supabase belum siap.");
-
-            try {
-                if (isRegisterMode) {
-                    const { error } = await supabase.auth.signUp({ email, password });
-                    if (error) throw error;
-                    alert('Pendaftaran berhasil! Silakan coba masuk.');
-                } else {
-                    const { error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    alert('Berhasil masuk!');
-                }
-                closeAuthModal();
-            } catch (err) {
-                alert('Gagal: ' + err.message);
-            }
-        };
-
-        // 4. TEKNIS BOOKMARK CLOUD
+        // --- SISTEM BOOKMARK CLOUD ---
         window.saveBookmarkToSupabase = async function(surahNo, surahName, ayatNo) {
             if (!currentUser) {
                 alert('Silakan MASUK/LOGIN terlebih dahulu untuk menyimpan bookmark.');
@@ -406,7 +387,69 @@
             }
         }
 
-        // 5. TEKNIS MEMUAT SURAH & AYAT
+        // --- APP HELPER FUNCTIONS ---
+        function setupTheme() {
+            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').textContent = '🌙';
+            }
+
+            themeToggle.onclick = () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    document.getElementById('themeIcon').textContent = '🌙';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    document.getElementById('themeIcon').textContent = '☀️';
+                }
+            };
+        }
+
+        async function fetchSurahList() {
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                allSurahs = data.data;
+            } catch (err) {
+                console.error("Gagal mengambil data surah:", err);
+            }
+        }
+
+        function renderSurahSearchList(list) {
+            if (!list || list.length === 0) {
+                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Surah tidak ditemukan.</div>`;
+                return;
+            }
+
+            surahListEl.innerHTML = list.map(s => `
+                <div onclick="selectSurah(${s.number})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center">
+                            ${s.number}
+                        </span>
+                        <div>
+                            <h4 class="font-semibold text-xs text-slate-800 dark:text-slate-100">${s.englishName}</h4>
+                            <p class="text-[10px] text-slate-400">${s.englishNameTranslation} • ${s.numberOfAyahs} Ayat</p>
+                        </div>
+                    </div>
+                    <span class="font-arabic text-emerald-600 dark:text-emerald-400 font-semibold">${s.name}</span>
+                </div>
+            `).join('');
+        }
+
+        window.selectSurah = function(surahNo) {
+            searchModal.classList.add('hidden');
+            searchInput.value = '';
+            loadSurah(surahNo);
+            document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
+        };
+
         async function loadSurah(surahNo) {
             currentSurahNo = surahNo;
             placeholderView.classList.add('hidden');
@@ -504,16 +547,6 @@
             btnCloseSearch.onclick = () => {
                 searchModal.classList.add('hidden');
                 searchInput.value = '';
-            };
-
-            btnCloseAuth.onclick = () => authModal.classList.add('hidden');
-
-            btnToggleAuth.onclick = () => {
-                isRegisterMode = !isRegisterMode;
-                document.getElementById('authModalTitle').textContent = isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun';
-                document.getElementById('btnAuthSubmit').textContent = isRegisterMode ? 'Daftar' : 'Masuk';
-                document.getElementById('authToggleText').textContent = isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?';
-                btnToggleAuth.textContent = isRegisterMode ? 'Masuk di sini' : 'Daftar Akun Baru';
             };
 
             searchInput.oninput = (e) => {
