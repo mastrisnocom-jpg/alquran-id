@@ -51,7 +51,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-darkBg dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col pb-28">
 
-    <!-- 1. HEADER / NAVBAR -->
+    <!-- 1. HEADER / NAVBAR (Tanpa Menu Iqro, Nama diganti "Profil Google") -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
@@ -67,16 +67,10 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Link Menu Iqro di Header -->
-                <a href="/iqro.html" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-500 hover:text-white transition flex items-center gap-1.5 shadow-sm">
-                    <span>📚</span>
-                    <span>Iqro</span>
-                </a>
-
-                <!-- Tombol Auth User / Login -->
-                <button id="btnAuth" onclick="openAuthModal()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-emerald-500 hover:text-white transition flex items-center gap-1.5 shadow-sm">
-                    <span id="authBtnIcon">👤</span>
-                    <span id="authBtnText">Masuk</span>
+                <!-- Tombol Auth User / Profil Google -->
+                <button id="btnAuth" onclick="openAuthModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-xs hover:bg-emerald-500 hover:text-white transition flex items-center gap-1.5 shadow-sm">
+                    <span id="authBtnIcon" class="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center">👤</span>
+                    <span id="authBtnText">Profil Google</span>
                 </button>
 
                 <!-- Tombol Cari -->
@@ -111,7 +105,7 @@
             </div>
         </div>
 
-        <!-- MENU NAVIGATION ICONS (TAMBAH MENU IQRO DIGITAL) -->
+        <!-- MENU NAVIGATION ICONS -->
         <div class="bg-white dark:bg-darkCard p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
             <div class="grid grid-cols-5 gap-2 text-center">
                 <div onclick="openSearchModal()" class="cursor-pointer group flex flex-col items-center">
@@ -121,7 +115,6 @@
                     <span class="text-[11px] font-medium mt-2 text-slate-700 dark:text-slate-200">Al-Quran</span>
                 </div>
 
-                <!-- MENU NAVIGASI IQRO BARU -->
                 <a href="/iqro.html" class="group flex flex-col items-center">
                     <div class="w-11 h-11 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-sm border border-emerald-500/30">
                         📚
@@ -177,7 +170,6 @@
                 </select>
             </div>
 
-            <!-- TAJWID SELECT -->
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🎨 Tajwid:</span>
                 <select id="tajweedSelect" class="bg-transparent font-bold focus:outline-none cursor-pointer w-full text-emerald-600 dark:text-emerald-400">
@@ -401,6 +393,7 @@
         const btnSubmitAuth = document.getElementById('btnSubmitAuth');
         const btnToggleAuthMode = document.getElementById('btnToggleAuthMode');
         const authBtnText = document.getElementById('authBtnText');
+        const authBtnIcon = document.getElementById('authBtnIcon');
         const profileEmail = document.getElementById('profileEmail');
 
         const searchModal = document.getElementById('searchModal');
@@ -467,27 +460,31 @@
             }
         }
 
+        // FUNGSI UPDATE UI HEADER DENGAN TEKS "Profil Google"
         function updateUserUI() {
             if (currentUserSession && currentUserSession.user) {
                 const userObj = currentUserSession.user;
                 const metadata = userObj.user_metadata || {};
                 const email = userObj.email || metadata.email || 'Pengguna Google';
-                const name = metadata.full_name || metadata.name || (email.includes('@') ? email.split('@')[0] : 'Profil');
                 const avatarUrl = metadata.avatar_url || metadata.picture;
 
-                authBtnText.textContent = name;
+                // Tampilkan Teks Tetap "Profil Google" di Tombol Header
+                authBtnText.textContent = 'Profil Google';
                 profileEmail.textContent = email;
 
                 if (avatarUrl) {
+                    authBtnIcon.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover rounded-full">`;
                     userAvatarContainer.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="w-full h-full object-cover">`;
                 } else {
+                    authBtnIcon.innerHTML = '👤';
                     userAvatarContainer.innerHTML = '👤';
                 }
 
                 userProfileView.classList.remove('hidden');
                 authFormView.classList.add('hidden');
             } else {
-                authBtnText.textContent = 'Masuk';
+                authBtnText.textContent = 'Profil Google';
+                authBtnIcon.innerHTML = '👤';
                 userProfileView.classList.add('hidden');
                 authFormView.classList.remove('hidden');
             }
