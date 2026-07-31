@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al-Qur'anul Karim — Ultimate Edition</title>
+    <title>Al-Qur'anul Karim — Pure Supabase Edition</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,23 +44,20 @@
                 <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 font-bold text-xl">📖</div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight text-emerald-700 dark:text-emerald-400">Al-Qur'anul Karim</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Digital Quran App</p>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Pure Supabase Integration</p>
                 </div>
             </div>
 
             <!-- Header Controls -->
             <div class="flex items-center gap-2">
-                <!-- Tombol Cari -->
                 <button type="button" onclick="openSearchModal()" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">🔍</button>
                 
-                <!-- Container Auth -->
                 <div id="authButtonContainer">
                     <button type="button" onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition">
                         Masuk
                     </button>
                 </div>
 
-                <!-- Tombol Dark Mode -->
                 <button type="button" onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition">
                     <span id="themeIcon">☀️</span>
                 </button>
@@ -191,18 +188,62 @@
         let currentSurahNo = null;
         let selectedLang = 'id.indonesian';
         let selectedQori = 'ar.alafasy';
+        let currentTheme = 'dark';
 
-        // Initialize App
+        // Init Application
         document.addEventListener('DOMContentLoaded', () => {
-            initDarkMode();
             fetchSurahs();
             initSupabaseSession();
         });
 
-        // 1. FITUR DARK MODE (GARANSI AKTIF)
-        function initDarkMode() {
-            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) {
+        // 1. TEKNIS SUPABASE PREFERENCES (PENGGANTI LOCALSTORAGE UTK DARK MODE, BAHASA, & QORI)
+        async function syncUserPreferencesFromSupabase() {
+            if (!currentUser || !supabase) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('user_preferences')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (data) {
+                    currentTheme = data.theme || 'dark';
+                    selectedLang = data.language || 'id.indonesian';
+                    selectedQori = data.qori || 'ar.alafasy';
+
+                    document.getElementById('langSelect').value = selectedLang;
+                    document.getElementById('qoriSelect').value = selectedQori;
+                    applyTheme(currentTheme);
+
+                    if (currentSurahNo) loadSurah(currentSurahNo);
+                } else {
+                    // Buat Record Default untuk User Baru
+                    await savePreferencesToSupabase();
+                }
+            } catch (err) {
+                console.error("Gagal sinkronisasi preferensi:", err.message);
+            }
+        }
+
+        async function savePreferencesToSupabase() {
+            if (!currentUser || !supabase) return;
+
+            try {
+                await supabase.from('user_preferences').upsert({
+                    user_id: currentUser.id,
+                    theme: currentTheme,
+                    language: selectedLang,
+                    qori: selectedQori,
+                    updated_at: new Date()
+                });
+            } catch (err) {
+                console.error("Gagal menyimpan preferensi ke Supabase:", err.message);
+            }
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.getElementById('themeIcon').textContent = '☀️';
             } else {
@@ -212,81 +253,26 @@
         }
 
         window.toggleDarkMode = function() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-                document.getElementById('themeIcon').textContent = '🌙';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-                document.getElementById('themeIcon').textContent = '☀️';
+            currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+            applyTheme(currentTheme);
+            if (currentUser) {
+                savePreferencesToSupabase();
             }
         };
 
-        // 2. FITUR PENCARIAN (GARANSI AKTIF)
-        async function fetchSurahs() {
-            try {
-                const res = await fetch('https://api.alquran.cloud/v1/surah');
-                const data = await res.json();
-                allSurahs = data.data;
-            } catch (err) {
-                console.error("Gagal memuat list surah:", err);
-            }
-        }
-
-        window.openSearchModal = function() {
-            document.getElementById('searchModal').classList.remove('hidden');
-            renderSurahSearchList(allSurahs);
-            setTimeout(() => document.getElementById('searchInput').focus(), 150);
+        window.changeLanguage = function(val) {
+            selectedLang = val;
+            if (currentUser) savePreferencesToSupabase();
+            if (currentSurahNo) loadSurah(currentSurahNo);
         };
 
-        window.closeSearchModal = function() {
-            document.getElementById('searchModal').classList.add('hidden');
-            document.getElementById('searchInput').value = '';
+        window.changeQori = function(val) {
+            selectedQori = val;
+            if (currentUser) savePreferencesToSupabase();
+            if (currentSurahNo) loadSurah(currentSurahNo);
         };
 
-        window.handleSearchInput = function(keyword) {
-            const val = keyword.toLowerCase().trim();
-            if (val === '') return renderSurahSearchList(allSurahs);
-
-            const filtered = allSurahs.filter(s => 
-                s.englishName.toLowerCase().includes(val) || 
-                s.englishNameTranslation.toLowerCase().includes(val) ||
-                s.number.toString() === val
-            );
-            renderSurahSearchList(filtered);
-        };
-
-        function renderSurahSearchList(list) {
-            const surahListEl = document.getElementById('surahList');
-            if (!list || list.length === 0) {
-                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Surah tidak ditemukan.</div>`;
-                return;
-            }
-
-            surahListEl.innerHTML = list.map(s => `
-                <div onclick="selectSurah(${s.number})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                        <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center">
-                            ${s.number}
-                        </span>
-                        <div>
-                            <h4 class="font-semibold text-xs text-slate-800 dark:text-slate-100">${s.englishName}</h4>
-                            <p class="text-[10px] text-slate-400">${s.englishNameTranslation} • ${s.numberOfAyahs} Ayat</p>
-                        </div>
-                    </div>
-                    <span class="font-arabic text-emerald-600 dark:text-emerald-400 font-semibold">${s.name}</span>
-                </div>
-            `).join('');
-        }
-
-        window.selectSurah = function(surahNo) {
-            closeSearchModal();
-            loadSurah(surahNo);
-            document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // 3. FITUR SUPABASE AUTH / LOGIN (GARANSI AKTIF)
+        // 2. SUPABASE AUTHENTICATION
         async function initSupabaseSession() {
             if (!supabase) return;
 
@@ -311,6 +297,9 @@
                         </button>
                     </div>`;
                 document.getElementById('userEmailTag').textContent = user.email.split('@')[0];
+                
+                // Sinkronisasi data user dari Supabase
+                syncUserPreferencesFromSupabase();
                 loadBookmarkFromSupabase();
             } else {
                 container.innerHTML = `
@@ -318,6 +307,7 @@
                         Masuk
                     </button>`;
                 document.getElementById('lastReadWidget').classList.add('hidden');
+                applyTheme('dark');
             }
         }
 
@@ -385,15 +375,121 @@
             }
         };
 
-        // 4. MEMUAT AYAT, BAHASA, DAN QORI
-        window.changeLanguage = function(val) {
-            selectedLang = val;
-            if (currentSurahNo) loadSurah(currentSurahNo);
+        // 3. BOOKMARK DENGAN SUPABASE CLOUD
+        window.saveBookmarkToSupabase = async function(surahNo, surahName, ayatNo) {
+            if (!currentUser) {
+                alert('Silakan MASUK/LOGIN terlebih dahulu untuk menyimpan bookmark.');
+                openAuthModal();
+                return;
+            }
+
+            try {
+                await supabase.from('bookmarks').delete().eq('user_id', currentUser.id);
+                const { error } = await supabase.from('bookmarks').insert([
+                    { user_id: currentUser.id, surah_no: surahNo, surah_name: surahName, ayat_no: ayatNo }
+                ]);
+
+                if (error) throw error;
+                alert(`Tersimpan di Cloud: ${surahName} ayat ${ayatNo}`);
+                loadBookmarkFromSupabase();
+            } catch (err) {
+                alert('Gagal menyimpan bookmark: ' + err.message);
+            }
         };
 
-        window.changeQori = function(val) {
-            selectedQori = val;
-            if (currentSurahNo) loadSurah(currentSurahNo);
+        async function loadBookmarkFromSupabase() {
+            if (!currentUser || !supabase) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('bookmarks')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const saved = data[0];
+                    document.getElementById('lastReadSurah').textContent = saved.surah_name;
+                    document.getElementById('lastReadAyat').textContent = `Ayat ${saved.ayat_no}`;
+                    document.getElementById('lastReadWidget').classList.remove('hidden');
+
+                    document.getElementById('btnContinue').onclick = async () => {
+                        await loadSurah(saved.surah_no);
+                        setTimeout(() => {
+                            const el = document.getElementById(`ayat-${saved.ayat_no}`);
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 500);
+                    };
+                }
+            } catch (err) {
+                console.error('Gagal membaca bookmark:', err.message);
+            }
+        }
+
+        // 4. MEMUAT DATA SURAH & PENCARIAN
+        async function fetchSurahs() {
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                allSurahs = data.data;
+            } catch (err) {
+                console.error("Gagal memuat list surah:", err);
+            }
+        }
+
+        window.openSearchModal = function() {
+            document.getElementById('searchModal').classList.remove('hidden');
+            renderSurahSearchList(allSurahs);
+            setTimeout(() => document.getElementById('searchInput').focus(), 150);
+        };
+
+        window.closeSearchModal = function() {
+            document.getElementById('searchModal').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
+        };
+
+        window.handleSearchInput = function(keyword) {
+            const val = keyword.toLowerCase().trim();
+            if (val === '') return renderSurahSearchList(allSurahs);
+
+            const filtered = allSurahs.filter(s => 
+                s.englishName.toLowerCase().includes(val) || 
+                s.englishNameTranslation.toLowerCase().includes(val) ||
+                s.number.toString() === val
+            );
+            renderSurahSearchList(filtered);
+        };
+
+        function renderSurahSearchList(list) {
+            const surahListEl = document.getElementById('surahList');
+            if (!list || list.length === 0) {
+                surahListEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Surah tidak ditemukan.</div>`;
+                return;
+            }
+
+            surahListEl.innerHTML = list.map(s => `
+                <div onclick="selectSurah(${s.number})" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl cursor-pointer transition flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center">
+                            ${s.number}
+                        </span>
+                        <div>
+                            <h4 class="font-semibold text-xs text-slate-800 dark:text-slate-100">${s.englishName}</h4>
+                            <p class="text-[10px] text-slate-400">${s.englishNameTranslation} • ${s.numberOfAyahs} Ayat</p>
+                        </div>
+                    </div>
+                    <span class="font-arabic text-emerald-600 dark:text-emerald-400 font-semibold">${s.name}</span>
+                </div>
+            `).join('');
+        }
+
+        window.selectSurah = function(surahNo) {
+            closeSearchModal();
+            loadSurah(surahNo);
+            document.getElementById('mainReadArea').scrollIntoView({ behavior: 'smooth' });
         };
 
         async function loadSurah(surahNo) {
@@ -464,60 +560,6 @@
                     </div>
                 </div>
             `).join('');
-        }
-
-        // 5. BOOKMARK SUPABASE REALTIME
-        window.saveBookmarkToSupabase = async function(surahNo, surahName, ayatNo) {
-            if (!currentUser) {
-                alert('Silakan MASUK/LOGIN terlebih dahulu untuk menyimpan bookmark.');
-                openAuthModal();
-                return;
-            }
-
-            try {
-                await supabase.from('bookmarks').delete().eq('user_id', currentUser.id);
-                const { error } = await supabase.from('bookmarks').insert([
-                    { user_id: currentUser.id, surah_no: surahNo, surah_name: surahName, ayat_no: ayatNo }
-                ]);
-
-                if (error) throw error;
-                alert(`Tersimpan di Cloud: ${surahName} ayat ${ayatNo}`);
-                loadBookmarkFromSupabase();
-            } catch (err) {
-                alert('Gagal menyimpan bookmark: ' + err.message);
-            }
-        };
-
-        async function loadBookmarkFromSupabase() {
-            if (!currentUser || !supabase) return;
-
-            try {
-                const { data, error } = await supabase
-                    .from('bookmarks')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    const saved = data[0];
-                    document.getElementById('lastReadSurah').textContent = saved.surah_name;
-                    document.getElementById('lastReadAyat').textContent = `Ayat ${saved.ayat_no}`;
-                    document.getElementById('lastReadWidget').classList.remove('hidden');
-
-                    document.getElementById('btnContinue').onclick = async () => {
-                        await loadSurah(saved.surah_no);
-                        setTimeout(() => {
-                            const el = document.getElementById(`ayat-${saved.ayat_no}`);
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 500);
-                    };
-                }
-            } catch (err) {
-                console.error('Gagal membaca bookmark:', err.message);
-            }
         }
 
         let activeAudio = null;
