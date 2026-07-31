@@ -51,7 +51,7 @@
             border-radius: 10px;
         }
 
-        /* ATURAN WARNA TAJWID */
+        /* ATURAN WARNA TAJWID RESPONSIF */
         .tj-ikhfa { color: #ef4444 !important; font-weight: bold; }      /* Ikhfa: Merah */
         .tj-idgham { color: #10b981 !important; font-weight: bold; }     /* Idgham / Ghunnah: Hijau */
         .tj-qalqalah { color: #3b82f6 !important; font-weight: bold; }   /* Qalqalah: Biru */
@@ -710,38 +710,29 @@
             return arabicPattern.test(text);
         }
 
-        // FUNGSI PARSER FORMAT TAJWID LENGKAP ([f:..., [n:..., [m:..., [q:..., dll)
+        // FUNGSI PARSER KODE TAJWID DENGAN CLEANER LENGKAP
         function parseTajweedCode(text) {
             if (!text) return '';
             let parsed = text;
 
-            // 1. Ganti pembuka tajwid berpola [x:ID[ menjadi tag span dengan class warna
-            parsed = parsed.replace(/\[f:[0-9]+\[/g, '<span class="tj-ikhfa">');      // f = Ikhfa (Merah)
-            parsed = parsed.replace(/\[n:[0-9]+\[/g, '<span class="tj-idgham">');     // n = Ghunnah (Hijau)
-            parsed = parsed.replace(/\[m:[0-9]+\[/g, '<span class="tj-idgham">');     // m = Idgham (Hijau)
-            parsed = parsed.replace(/\[q:[0-9]+\[/g, '<span class="tj-qalqalah">');   // q = Qalqalah (Biru)
-            parsed = parsed.replace(/\[p:[0-9]+\[/g, '<span class="tj-iqlab">');      // p = Iqlab (Oranye)
-            parsed = parsed.replace(/\[c:[0-9]+\[/g, '<span class="tj-mad">');        // c = Mad (Pink)
-            parsed = parsed.replace(/\[w:[0-9]+\[/g, '<span class="tj-mad">');        // w = Mad (Pink)
-            parsed = parsed.replace(/\[a:[0-9]+\[/g, '<span class="tj-mad">');        // a = Mad (Pink)
-            parsed = parsed.replace(/\[o:[0-9]+\[/g, '<span class="tj-mad">');        // o = Mad (Pink)
-            parsed = parsed.replace(/\[h:[0-9]+\[/g, '<span class="tj-silent">');     // h = Hamzah Wasal (Abu-abu)
-            parsed = parsed.replace(/\[s:[0-9]+\[/g, '<span class="tj-silent">');     // s = Sukun/Silent (Abu-abu)
+            // 1. Ubah Tag Pembuka Tajwid berpola [kode:id[ atau [kode[ menjadi HTML span
+            parsed = parsed.replace(/\[f(:[0-9]+)?\[/g, '<span class="tj-ikhfa">');      // f = Ikhfa (Merah)
+            parsed = parsed.replace(/\[n(:[0-9]+)?\[/g, '<span class="tj-idgham">');     // n = Ghunnah (Hijau)
+            parsed = parsed.replace(/\[m(:[0-9]+)?\[/g, '<span class="tj-idgham">');     // m = Idgham (Hijau)
+            parsed = parsed.replace(/\[q(:[0-9]+)?\[/g, '<span class="tj-qalqalah">');   // q = Qalqalah (Biru)
+            parsed = parsed.replace(/\[p(:[0-9]+)?\[/g, '<span class="tj-iqlab">');      // p = Iqlab (Oranye)
+            parsed = parsed.replace(/\[c(:[0-9]+)?\[/g, '<span class="tj-mad">');        // c = Mad (Pink)
+            parsed = parsed.replace(/\[w(:[0-9]+)?\[/g, '<span class="tj-mad">');        // w = Mad (Pink)
+            parsed = parsed.replace(/\[a(:[0-9]+)?\[/g, '<span class="tj-mad">');        // a = Mad (Pink)
+            parsed = parsed.replace(/\[o(:[0-9]+)?\[/g, '<span class="tj-mad">');        // o = Mad (Pink)
+            parsed = parsed.replace(/\[h(:[0-9]+)?\[/g, '<span class="tj-silent">');     // h = Hamzah Wasal (Abu-abu)
+            parsed = parsed.replace(/\[s(:[0-9]+)?\[/g, '<span class="tj-silent">');     // s = Sukun/Silent (Abu-abu)
 
-            // 2. Ganti pembuka tanpa ID
-            parsed = parsed.replace(/\[f\[/g, '<span class="tj-ikhfa">');
-            parsed = parsed.replace(/\[n\[/g, '<span class="tj-idgham">');
-            parsed = parsed.replace(/\[m\[/g, '<span class="tj-idgham">');
-            parsed = parsed.replace(/\[q\[/g, '<span class="tj-qalqalah">');
-            parsed = parsed.replace(/\[p\[/g, '<span class="tj-iqlab">');
-            parsed = parsed.replace(/\[c\[/g, '<span class="tj-mad">');
-            parsed = parsed.replace(/\[w\[/g, '<span class="tj-mad">');
-            parsed = parsed.replace(/\[a\[/g, '<span class="tj-mad">');
-            parsed = parsed.replace(/\[o\[/g, '<span class="tj-mad">');
-            parsed = parsed.replace(/\[h\[/g, '<span class="tj-silent">');
-            parsed = parsed.replace(/\[s\[/g, '<span class="tj-silent">');
+            // 2. Bersihkan tag ID bertingkat aneh seperti [1], [2], dll dari API
+            parsed = parsed.replace(/\[[0-9]+\]/g, '');
+            parsed = parsed.replace(/\[[0-9]+\[/g, '');
 
-            // 3. Tutup kurung penutup tajwid ']' menjadi </span>
+            // 3. Ubah kurung siku penutup ']' menjadi </span>
             parsed = parsed.replace(/\]/g, '</span>');
 
             return parsed;
