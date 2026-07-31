@@ -70,18 +70,15 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Tombol Auth User / Login -->
                 <button id="btnAuth" onclick="openAuthModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-xs hover:bg-emerald-500 hover:text-white transition flex items-center gap-1.5 shadow-sm">
                     <span id="authBtnIcon">👤</span>
                     <span id="authBtnText">Masuk</span>
                 </button>
 
-                <!-- Tombol Cari -->
                 <button id="btnOpenSearch" onclick="openSearchModal()" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     🔍
                 </button>
 
-                <!-- Tombol Mode Gelap -->
                 <button id="themeToggle" class="w-10 h-10 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition shadow-sm">
                     <span id="themeIcon">☀️</span>
                 </button>
@@ -92,7 +89,7 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-6">
 
-        <!-- 2. WIDGET BACAAN TERAKHIR -->
+        <!-- WIDGET BACAAN TERAKHIR -->
         <div id="lastReadWidget" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-800 to-teal-700 text-white p-4 sm:p-5 rounded-2xl shadow-lg">
             <div class="flex justify-between items-center">
                 <div>
@@ -108,7 +105,7 @@
             </div>
         </div>
 
-        <!-- 3. MENU NAVIGATION ICONS -->
+        <!-- MENU NAVIGATION ICONS -->
         <div class="bg-white dark:bg-darkCard p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
             <div class="grid grid-cols-4 gap-3 text-center">
                 <div onclick="openSearchModal()" class="cursor-pointer group flex flex-col items-center">
@@ -141,7 +138,7 @@
             </div>
         </div>
 
-        <!-- 4. BARIS FILTER BAHASA, QORI & MODE AUDIO -->
+        <!-- BARIS FILTER -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white dark:bg-darkCard p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-xs">
             <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl">
                 <span>🌐 Bahasa:</span>
@@ -175,7 +172,7 @@
             </div>
         </div>
 
-        <!-- 5. AREA BACA / DETAIL SURAH -->
+        <!-- AREA BACA / DETAIL SURAH -->
         <section id="mainReadArea">
             <div id="surahDetail" class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-6 min-h-[500px]">
                 
@@ -219,7 +216,7 @@
 
     </main>
 
-    <!-- 6. MODAL AUTHENTICATION SUPABASE -->
+    <!-- MODAL AUTHENTICATION -->
     <div id="authModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 relative">
             
@@ -250,6 +247,23 @@
                     <p id="authSubtitle" class="text-xs text-slate-400 mt-1">Simpan bookmark dan surah favorit ke cloud.</p>
                 </div>
 
+                <!-- Tombol Google Login -->
+                <button onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Lanjutkan dengan Google</span>
+                </button>
+
+                <div class="flex items-center my-3">
+                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
+                    <span class="px-3 text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Atau</span>
+                    <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
+                </div>
+
                 <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Email</label>
@@ -277,7 +291,7 @@
         </div>
     </div>
 
-    <!-- 7. MODAL SEARCH POPUP -->
+    <!-- MODAL SEARCH POPUP -->
     <div id="searchModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-16 px-4 hidden">
         <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
@@ -320,11 +334,11 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // CONFIG KREDENSIAL SUPABASE
+        // CONFIG SUPABASE
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_gVgGhplre86qbD-hdtWkVw_YwygkiWy'; 
+        const SUPABASE_ANON_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
 
-        // REST API DIRECT SUPABASE FETCH ENGINE (Bebas dari Masalah SDK CDN)
+        // REST API DIRECT SUPABASE FETCH ENGINE
         const SupabaseApi = {
             async signUp(email, password) {
                 const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
@@ -427,12 +441,47 @@
         document.addEventListener('DOMContentLoaded', async () => {
             initTheme();
             restoreSettingsUI();
+            checkOAuthCallback();
             updateUserUI();
             await fetchSurahList();
             checkBookmark();
             setupAudioListeners();
             restoreSessionState();
         });
+
+        // HANDLER LOGIN GOOGLE (OAUTH)
+        function handleGoogleLogin() {
+            const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+            window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
+        }
+
+        function checkOAuthCallback() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token=')) {
+                const params = new URLSearchParams(hash.replace('#', '?'));
+                const accessToken = params.get('access_token');
+                
+                if (accessToken) {
+                    fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(user => {
+                        if (user && user.id) {
+                            currentUserSession = { access_token: accessToken, user: user };
+                            localStorage.setItem('supabase_user_session', JSON.stringify(currentUserSession));
+                            updateUserUI();
+                            window.location.hash = '';
+                            alert('Berhasil login dengan Google!');
+                        }
+                    })
+                    .catch(err => console.error('OAuth token parse error:', err));
+                }
+            }
+        }
 
         // AUTH HANDLERS
         function updateUserUI() {
