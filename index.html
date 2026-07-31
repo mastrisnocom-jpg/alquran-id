@@ -35,8 +35,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Scheherazade+New:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Supabase JS Client CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.8/supabase.min.js"></script>
+    <!-- Supabase JS Client CDN Resmi -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         body {
@@ -334,17 +334,26 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // ================= CONFIG SUPABASE =================
+        // ================= CONFIG SUPABASE AUTO-INIT =================
         const SUPABASE_URL = 'https://hsiguoieyyracptyzihn.supabase.co';
         const SUPABASE_ANON_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzaWd1b2lleXlyYWNwdHl6aWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NzI3MTAsImV4cCI6MjEwMTA0ODcxMH0.RQcIUbyYFrZJVj4H_aoJ6VytKgMDFeydZzJDCwWfysc'; 
         
         let supabase = null;
-        try {
-            if (window.supabase && typeof window.supabase.createClient === 'function') {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Pengecekan Aman Inisialisasi Supabase SDK Universal
+        function initSupabase() {
+            try {
+                if (typeof supabase !== 'undefined' && supabase && typeof supabase.createClient === 'function') {
+                    return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                } else if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                } else if (typeof createClient === 'function') {
+                    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                }
+            } catch (e) {
+                console.warn('Inisialisasi Supabase terlewati:', e);
             }
-        } catch (e) {
-            console.warn('Supabase Offline Mode:', e);
+            return null;
         }
 
         let currentUser = null;
@@ -397,6 +406,7 @@
         const btnContinue = document.getElementById('btnContinue');
 
         document.addEventListener('DOMContentLoaded', async () => {
+            supabase = initSupabase(); // Jalankan inisialisasi resmi
             initTheme();
             restoreSettingsUI();
             checkUserSession();
@@ -417,7 +427,7 @@
                     updateUserUI(session ? session.user : null);
                 });
             } catch (err) {
-                console.warn('Session failed:', err);
+                console.warn('Cek sesi Supabase terlewati:', err);
             }
         }
 
@@ -460,7 +470,10 @@
 
         async function handleAuthSubmit(e) {
             e.preventDefault();
-            if (!supabase) return alert('Konfigurasi Supabase belum terhubung dengan benar.');
+            if (!supabase) {
+                supabase = initSupabase();
+                if (!supabase) return alert('Gagal menghubungkan ke Supabase. Pastikan koneksi internet stabil.');
+            }
 
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value.trim();
@@ -473,7 +486,7 @@
                     const { error } = await supabase.auth.signUp({ email, password });
                     if (error) alert('Gagal Daftar: ' + error.message);
                     else {
-                        alert('Pendaftaran berhasil! Cek email Anda untuk konfirmasi akun.');
+                        alert('Pendaftaran berhasil! Cek inbox/spam email Anda untuk konfirmasi akun.');
                         toggleAuthMode();
                     }
                 } else {
@@ -493,7 +506,9 @@
         }
 
         async function handleGoogleLogin() {
-            if (!supabase) return alert('Konfigurasi Supabase belum terhubung.');
+            if (!supabase) supabase = initSupabase();
+            if (!supabase) return alert('Gagal menghubungkan ke Supabase.');
+
             const { error } = await supabase.auth.signInWithOAuth({ 
                 provider: 'google',
                 options: { redirectTo: window.location.href }
