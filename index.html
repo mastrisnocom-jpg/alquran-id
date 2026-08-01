@@ -103,7 +103,7 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-5 flex-1 w-full space-y-5">
 
-        <!-- WIDGET JADWAL SHOLAT (HIJAU + KEMENAG + JAM DIGITAL) -->
+        <!-- WIDGET JADWAL SHOLAT (BACKGROUND HIJAU + KEMENAG + JAM REAL-TIME) -->
         <div class="bg-gradient-to-br from-emerald-800 via-emerald-900 to-teal-950 p-4 sm:p-5 rounded-3xl shadow-lg text-white space-y-4 border border-emerald-700/50 relative overflow-hidden">
             
             <div class="flex justify-between items-center border-b border-white/10 pb-3">
@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <!-- JAM REAL-TIME SESUAI PERANGKAT -->
+                <!-- JAM REAL-TIME PERANGKAT -->
                 <div class="text-right">
                     <div id="liveDeviceClock" class="font-mono font-bold text-lg sm:text-xl text-emerald-300 tracking-wider">00:00:00</div>
                     <p id="liveDeviceDate" class="text-[9px] text-emerald-200/70 font-medium"></p>
@@ -525,7 +525,7 @@
             await restoreSessionState();
         });
 
-        // JAM REAL-TIME SESUAI PERANGKAT
+        // JAM REAL-TIME PERANGKAT
         function startDeviceClock() {
             function updateClock() {
                 const now = new Date();
@@ -610,7 +610,6 @@
             const date = String(now.getDate()).padStart(2, '0');
 
             try {
-                // 1. Cari ID Kota terdekat berdasarkan koordinat via myQuran API (Standard Kemenag)
                 let kotaId = '1638'; // Default Surabaya
                 
                 try {
@@ -622,7 +621,6 @@
                     }
                 } catch(e) { console.warn('City lookup fallback'); }
 
-                // 2. Ambil Jadwal Sholat Kemenag berdasarkan ID Kota
                 const resJadwal = await fetch(`https://api.myquran.com/v2/sholat/jadwal/${kotaId}/${year}/${month}/${date}`);
                 const dataJadwal = await resJadwal.json();
 
@@ -840,20 +838,27 @@
 
         function containsArabic(text) { return /[\u0600-\u06FF]/.test(text); }
 
+        // FUNGSI PARSE TAJWEED DIREVISI (TIDAK ADA LAGI KARAKTER/ANGKA ANEH)
         function parseTajweedCode(text) {
             if (!text) return '';
             let str = text;
-            str = str.replace(/\[\d+\]/g, '');
-            str = str.replace(/\[f:\d+\[/g, '<span class="tj-ikhfa">').replace(/\[f\[/g, '<span class="tj-ikhfa">');
-            str = str.replace(/\[n:\d+\[/g, '<span class="tj-idgham">').replace(/\[n\[/g, '<span class="tj-idgham">');
-            str = str.replace(/\[m:\d+\[/g, '<span class="tj-idgham">').replace(/\[m\[/g, '<span class="tj-idgham">');
-            str = str.replace(/\[q:\d+\[/g, '<span class="tj-qalqalah">').replace(/\[q\[/g, '<span class="tj-qalqalah">');
-            str = str.replace(/\[p:\d+\[/g, '<span class="tj-iqlab">').replace(/\[p\[/g, '<span class="tj-iqlab">');
-            str = str.replace(/\[[cwaoi]:\d+\[/g, '<span class="tj-mad">').replace(/\[[cwaoi]\[/g, '<span class="tj-mad">');
-            str = str.replace(/\[[hsl]:\d+\[/g, '<span class="tj-silent">').replace(/\[[hsl]\[/g, '<span class="tj-silent">');
-            str = str.replace(/\[\d+\[/g, '');
+
+            // 1. Ganti tag tajwid ke class CSS berwarna
+            str = str.replace(/\[f[:\d]*\[/g, '<span class="tj-ikhfa">');
+            str = str.replace(/\[[nm][:\d]*\[/g, '<span class="tj-idgham">');
+            str = str.replace(/\[q[:\d]*\[/g, '<span class="tj-qalqalah">');
+            str = str.replace(/\[p[:\d]*\[/g, '<span class="tj-iqlab">');
+            str = str.replace(/\[[cwaoi][:\d]*\[/g, '<span class="tj-mad">');
+            str = str.replace(/\[[hsl][:\d]*\[/g, '<span class="tj-silent">');
+
+            // 2. Tutup span tajwid
             str = str.replace(/\]/g, '</span>');
-            str = str.replace(/\[/g, '').replace(/\]/g, '');
+
+            // 3. Bersihkan sisa-sisa metadata numerik API ([11226], [u:11227], dll)
+            str = str.replace(/\[[^\]]*\]/g, '');
+            str = str.replace(/\[[a-zA-Z0-9_:]*/g, '');
+            str = str.replace(/\]/g, '');
+
             return str;
         }
 
@@ -901,7 +906,11 @@
                     }
 
                     let formattedArab = ayah.text;
-                    if (isTajweedEnabled) { formattedArab = parseTajweedCode(ayah.text); }
+                    if (isTajweedEnabled) { 
+                        formattedArab = parseTajweedCode(ayah.text); 
+                    } else {
+                        formattedArab = formattedArab.replace(/\[.*?\]/g, '');
+                    }
 
                     return {
                         numberInSurah: ayah.numberInSurah,
